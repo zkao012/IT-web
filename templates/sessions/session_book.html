@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Book Session — TrackIt{% endblock %}
+{% block page_title %}Book a Session{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h4>📅 New Session Booking</h4>
+
+  <form method="post" novalidate id="booking-form">
+    {% csrf_token %}
+
+    <div style="margin-bottom:18px;">
+      <label class="form-label">Select Task</label>
+      {{ form.task }}
+      {% if form.task.errors %}
+        <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.task.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+      <div>
+        <label class="form-label">Start Time</label>
+        {{ form.planned_start }}
+        {% if form.planned_start.errors %}
+          <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.planned_start.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label class="form-label">End Time</label>
+        {{ form.planned_end }}
+        {% if form.planned_end.errors %}
+          <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.planned_end.errors }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label class="form-label">Notes (optional)</label>
+      {{ form.notes }}
+    </div>
+
+    {% if form.non_field_errors %}
+    <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px;">
+      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn-orange" style="flex:1; justify-content:center;">
+        <i class="fas fa-check"></i> Confirm Booking
+      </button>
+      <a href="{% url 'session_list' %}" class="btn-gray">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // 从后端拿到每个 task 的剩余时长
+  const tasksRemaining = {{ tasks_remaining|safe }};
+
+  const form = document.getElementById('booking-form');
+
+  form.addEventListener('submit', function (e) {
+    const taskId = parseInt(document.querySelector('[name=planned_task]') 
+                   ? document.querySelector('[name=planned_task]').value 
+                   : document.querySelector('[name=task]').value);
+    const startVal = document.querySelector('[name=planned_start]').value;
+    const endVal = document.querySelector('[name=planned_end]').value;
+
+    if (!startVal || !endVal || !taskId) return;
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+    const sessionMinutes = Math.round((end - start) / 60000);
+    const remaining = tasksRemaining[taskId];
+
+    if (remaining !== undefined && sessionMinutes > remaining) {
+      const confirmed = confirm(
+        `⚠️ Heads up!\n\n` +
+        `This session is ${sessionMinutes} min, but your remaining target is only ${remaining} min.\n\n` +
+        `Progress will be capped at 100%. Do you still want to continue?`
+      );
+      if (!confirmed) {
+        e.preventDefault();
+      }
+    }
+  });
+
+});
+</script>
+{% endblock %}

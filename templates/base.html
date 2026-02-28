@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TrackIt{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+
+  <!-- ===== 顶部全站导航栏 ===== -->
+  <header class="global-nav" role="banner">
+    <div class="global-nav-inner">
+
+      <!-- Logo -->
+      <a href="{% url 'task_list' %}" class="global-logo" aria-label="TrackIt Home">
+        <div class="global-logo-icon">T</div>
+        <span>TrackIt</span>
+      </a>
+
+      <!-- 全站模块导航 -->
+      <nav class="global-links" role="navigation" aria-label="Main navigation">
+        <a href="#" class="global-link" aria-label="Go to Dashboard">
+          <i class="fas fa-home" aria-hidden="true"></i> Dashboard
+        </a>
+        <a href="{% url 'task_list' %}"
+           class="global-link {% if 'task' in request.resolver_match.url_name %}active{% endif %}"
+           aria-label="Go to Tasks module">
+          <i class="fas fa-tasks" aria-hidden="true"></i> Tasks
+        </a>
+        <a href="{% url 'session_list' %}"
+           class="global-link {% if 'session' in request.resolver_match.url_name %}active{% endif %}"
+           aria-label="Go to Sessions module">
+          <i class="fas fa-calendar-check" aria-hidden="true"></i> Sessions
+        </a>
+        <a href="#" class="global-link" aria-label="Go to Progress Statistics">
+          <i class="fas fa-chart-line" aria-hidden="true"></i> Statistics
+        </a>
+        {% if user.is_staff %}
+        <a href="/admin/" class="global-link" aria-label="Go to User Management">
+          <i class="fas fa-users" aria-hidden="true"></i> Users
+        </a>
+        {% endif %}
+      </nav>
+
+      <!-- 右侧用户信息 -->
+      <div class="global-user">
+        {% if user.is_authenticated %}
+        <div class="global-user-avatar" aria-label="Logged in as {{ request.user.username }}">
+          {{ request.user.username|first|upper }}
+        </div>
+        <span class="global-username">{{ request.user.username }}</span>
+        <a href="/admin/" class="global-admin-btn" aria-label="Go to Admin panel">
+          <i class="fas fa-cog" aria-hidden="true"></i>
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ===== 页面主体 ===== -->
+  <div class="page-wrapper">
+
+    <!-- 侧边栏（动态切换模块） -->
+    <aside class="sidebar" role="complementary">
+
+      {% if 'task' in request.resolver_match.url_name %}
+      <!-- ===== Tasks 侧边栏 ===== -->
+      <div class="sidebar-section-label">Tasks Module</div>
+      <nav class="sidebar-nav" aria-label="Tasks navigation">
+        <a href="{% url 'task_list' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'task_list' %}active{% endif %}">
+          <i class="fas fa-list-check" aria-hidden="true"></i>
+          <span>My Tasks</span>
+        </a>
+        <a href="{% url 'task_create' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'task_create' %}active{% endif %}">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i>
+          <span>New Task</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Your Progress</div>
+
+      <!-- Task 统计小卡片 -->
+      <div class="sidebar-stat-card">
+        <i class="fas fa-fire" style="color:#FF6B2C;"></i>
+        <div>
+          <div class="sidebar-stat-number">{{ request.user.tasks.count }}</div>
+          <div class="sidebar-stat-label">Active Tasks</div>
+        </div>
+      </div>
+
+      <div class="sidebar-tip">
+        <i class="fas fa-lightbulb"></i>
+        <span>Break big goals into smaller tasks!</span>
+      </div>
+
+      {% else %}
+      <!-- ===== Sessions 侧边栏 ===== -->
+      <div class="sidebar-section-label">Sessions Module</div>
+      <nav class="sidebar-nav" aria-label="Sessions navigation">
+        <a href="{% url 'session_list' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">
+          <i class="fas fa-list" aria-hidden="true"></i>
+          <span>My Sessions</span>
+        </a>
+        <a href="{% url 'session_book' %}"
+           class="nav-item {% if request.resolver_match.url_name == 'session_book' %}active{% endif %}">
+          <i class="fas fa-plus-circle" aria-hidden="true"></i>
+          <span>Book Session</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Quick Stats</div>
+
+      <div class="sidebar-stat-card">
+        <i class="fas fa-calendar-check" style="color:#FF6B2C;"></i>
+        <div>
+          <div class="sidebar-stat-number">{{ request.user.sessions.count }}</div>
+          <div class="sidebar-stat-label">Total Sessions</div>
+        </div>
+      </div>
+
+      <div class="sidebar-tip">
+        <i class="fas fa-lightbulb"></i>
+        <span>Consistency beats intensity!</span>
+      </div>
+
+      {% endif %}
+
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="main-wrapper">
+
+      <!-- 面包屑 + 页面标题栏 -->
+      <div class="topbar" role="banner">
+        <div>
+          <div class="breadcrumb-nav" aria-label="Breadcrumb">
+            <span>TrackIt</span>
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            {% if 'task' in request.resolver_match.url_name %}
+              <span>Tasks</span>
+            {% else %}
+              <span>Sessions</span>
+            {% endif %}
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            <span class="breadcrumb-current">{% block page_title %}{% endblock %}</span>
+          </div>
+        </div>
+
+        {% if 'task' in request.resolver_match.url_name %}
+          <a href="{% url 'task_create' %}" class="btn-orange" aria-label="Create a new task">
+            <i class="fas fa-plus" aria-hidden="true"></i> New Task
+          </a>
+        {% else %}
+          <a href="{% url 'session_book' %}" class="btn-orange" aria-label="Book a new session">
+            <i class="fas fa-plus" aria-hidden="true"></i> New Session
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- 消息提示 -->
+      {% for message in messages %}
+      <div class="alert-banner alert-{{ message.tags }}" role="alert" aria-live="polite">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"
+           aria-hidden="true"></i>
+        {{ message }}
+      </div>
+      {% endfor %}
+
+      <!-- 页面内容 -->
+      <main class="content-area" role="main" id="main-content">
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="site-footer" role="contentinfo">
+        <div class="footer-inner">
+
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <div class="global-logo-icon" style="width:28px;height:28px;font-size:14px;">T</div>
+              <span style="font-weight:800; font-size:16px;">TrackIt</span>
+            </div>
+            <p class="footer-tagline">Learning & Activity Progress Management System</p>
+            <p class="footer-course">COMPSCI5012 Group BT · University of Glasgow</p>
+          </div>
+
+          <div class="footer-links-group">
+            <div class="footer-links-title">Modules</div>
+            <a href="#" class="footer-link"><i class="fas fa-sign-in-alt"></i> Login / Register</a>
+            <a href="{% url 'task_list' %}" class="footer-link"><i class="fas fa-tasks"></i> Task Management</a>
+            <a href="{% url 'session_list' %}" class="footer-link"><i class="fas fa-calendar-check"></i> Sessions & Booking</a>
+            <a href="#" class="footer-link"><i class="fas fa-chart-bar"></i> Statistics</a>
+          </div>
+
+        </div>
+
+        <div class="footer-bottom">
+          <span>© 2026 TrackIt · COMPSCI5012 Group BT · Built with Django & Bootstrap</span>
+          <span style="color:var(--gray-400);">
+            <i class="fas fa-universal-access"></i> WCAG 2.2 Compliant
+          </span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    flatpickr("input[type='datetime-local']", {
+      enableTime: true,
+      dateFormat: "Y-m-d H:i",
+      time_24hr: true,
+      locale: "en",
+      minDate: "today",
+      allowInput: true
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

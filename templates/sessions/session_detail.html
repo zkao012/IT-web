@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% block title %}Session Detail — TrackIt{% endblock %}
+{% block page_title %}Update Progress{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+
+  <!-- 基本信息 -->
+  <div class="trackit-card mb-4" style="padding:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <h4 style="font-size:20px; font-weight:800; margin-bottom:6px;">{{ session.task.title }}</h4>
+        <div style="font-size:14px; color:var(--gray-400);">
+          <i class="fas fa-clock" style="margin-right:6px;"></i>
+          {{ session.planned_start|date:"M d, Y · H:i" }} → {{ session.planned_end|date:"H:i" }}
+          <span style="margin-left:8px; color:var(--gray-300);">· {{ session.planned_minutes }} min planned</span>
+        </div>
+      </div>
+      <span class="status-badge status-{{ session.status }}" id="status-badge">
+        {{ session.get_status_display }}
+      </span>
+    </div>
+  </div>
+
+  <!-- pending：还没开始 -->
+  {% if session.status == 'pending' %}
+  <div class="trackit-card" style="padding:28px; text-align:center;">
+    <div style="font-size:40px; margin-bottom:16px;">⏳</div>
+    <h5 style="font-weight:700; margin-bottom:8px;">This session hasn't started yet</h5>
+    <p style="color:var(--gray-400); font-size:14px; margin-bottom:24px;">
+      You can't log progress before the session starts.<br>
+      If you've already done the work, adjust the session time first.
+    </p>
+    <button onclick="document.getElementById('edit-time-panel').style.display='block'; this.style.display='none';"
+            class="btn-orange" style="justify-content:center;">
+      <i class="fas fa-clock"></i> Adjust Session Time
+    </button>
+  </div>
+
+  <!-- 调整时间面板 -->
+  <div id="edit-time-panel" class="trackit-card mt-3" style="padding:28px; display:none;">
+    <h5 style="font-size:15px; font-weight:700; margin-bottom:20px;">🕐 Adjust Session Time</h5>
+    <div id="edit-time-feedback" style="display:none; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px; font-weight:500;"></div>
+    <div style="margin-bottom:16px;">
+      <label class="form-label">Start Time</label>
+      <input type="datetime-local" id="new_start" class="form-control"
+             value="{{ session.planned_start|date:'Y-m-d' }}T{{ session.planned_start|date:'H:i' }}">
+    </div>
+    <div style="margin-bottom:24px;">
+      <label class="form-label">End Time</label>
+      <input type="datetime-local" id="new_end" class="form-control"
+             value="{{ session.planned_end|date:'Y-m-d' }}T{{ session.planned_end|date:'H:i' }}">
+    </div>
+    <button id="save_time" class="btn-orange" style="width:100%; justify-content:center; padding:12px;">
+      <i class="fas fa-save"></i> Save Time
+    </button>
+  </div>
+
+  <!-- cancelled -->
+  {% elif session.status == 'cancelled' %}
+  <div style="background:var(--gray-100); padding:20px; border-radius:var(--radius); color:var(--gray-400); text-align:center;">
+    This session has been cancelled.
+  </div>
+
+  <!-- in_progress / completed -->
+  {% else %}
+  <div class="trackit-card" style="padding:28px;">
+    <h5 style="font-size:16px; font-weight:700; margin-bottom:22px; color:var(--gray-800);">
+      📝 Update Progress
+    </h5>
+
+    <div id="progress-feedback" style="display:none; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px; font-weight:500;"></div>
+
+    <!-- 实际时长 -->
+    <div style="margin-bottom:20px;">
+      <label class="form-label">Actual Time Spent (minutes)</label>
+      <input type="number" id="actual_minutes" class="form-control"
+             value="{{ session.actual_minutes }}" min="0">
+    </div>
+
+    <!-- 学习质量 -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div>
+          <label class="form-label" style="margin:0;">Learning Quality</label>
+          <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">How well did you focus this session?</div>
+        </div>
+        <span id="percent_display" style="font-size:22px; font-weight:800; color:var(--orange);">
+          {{ session.completion_percent }}%
+        </span>
+      </div>
+      <input type="range" id="completion_percent" class="form-range"
+             min="0" max="100" step="5" value="{{ session.completion_percent }}">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--gray-400); margin-top:4px;">
+        <span>😴 0%</span><span>🙂 50%</span><span>🔥 100%</span>
+      </div>
+    </div>
+
+    <!-- 备注 -->
+    <div style="margin-bottom:24px;">
+      <label class="form-label">Notes</label>
+      <textarea id="session_notes" class="form-control" rows="3"
+                placeholder="What did you learn or accomplish?">{{ session.notes }}</textarea>
+    </div>
+
+    <!-- 两个按钮 -->
+    <div style="display:flex; gap:10px;">
+      <button id="save_progress" class="btn-gray" style="flex:1; justify-content:center; padding:12px;">
+        <i class="fas fa-save"></i> Save Progress
+      </button>
+      <button id="mark_complete" class="btn-orange" style="flex:1; justify-content:center; padding:12px;">
+        <i class="fas fa-check"></i> Mark as Complete
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:20px;">
+    <a href="{% url 'session_list' %}" class="btn-gray">← Back to Sessions</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ===== 学习质量滑块 =====
+  const slider = document.getElementById('completion_percent');
+  const display = document.getElementById('percent_display');
+
+  if (slider && display) {
+    slider.addEventListener('input', function () {
+      display.textContent = this.value + '%';
+      display.style.color = this.value == 100 ? '#10B981' : '#FF6B2C';
+    });
+  }
+
+  // ===== 通用保存函数 =====
+  function saveProgress(markComplete) {
+    const payload = {
+      actual_minutes: parseInt(document.getElementById('actual_minutes').value) || 0,
+      completion_percent: parseInt(slider.value),
+      notes: document.getElementById('session_notes').value,
+      mark_complete: markComplete,
+    };
+
+    const saveBtn = document.getElementById('save_progress');
+    const completeBtn = document.getElementById('mark_complete');
+    saveBtn.disabled = true;
+    completeBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    fetch("{% url 'session_progress' session.pk %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(r => r.json())
+    .then(data => {
+      const fb = document.getElementById('progress-feedback');
+      fb.style.display = 'block';
+
+      if (data.success) {
+        document.getElementById('status-badge').textContent = data.status_display;
+        fb.style.background = '#D1FAE5';
+        fb.style.color = '#065F46';
+        fb.textContent = markComplete ? '✅ Session completed!' : '✅ Progress saved!';
+        saveBtn.innerHTML = '✅ Saved';
+        setTimeout(() => {
+          window.location.href = "{% url 'session_list' %}";
+        }, 800);
+      } else {
+        fb.style.background = '#FEF2F2';
+        fb.style.color = '#991B1B';
+        fb.textContent = '❌ ' + (data.error || 'Something went wrong.');
+        saveBtn.disabled = false;
+        completeBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Progress';
+        setTimeout(() => fb.style.display = 'none', 3000);
+      }
+    })
+    .catch(() => {
+      const saveBtn = document.getElementById('save_progress');
+      const completeBtn = document.getElementById('mark_complete');
+      saveBtn.disabled = false;
+      completeBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Progress';
+    });
+  }
+
+  const saveBtn = document.getElementById('save_progress');
+  const completeBtn = document.getElementById('mark_complete');
+
+  if (saveBtn) saveBtn.addEventListener('click', () => saveProgress(false));
+  if (completeBtn) completeBtn.addEventListener('click', () => saveProgress(true));
+
+  // ===== 调整时间保存 =====
+  const saveTimeBtn = document.getElementById('save_time');
+
+  if (saveTimeBtn) {
+    saveTimeBtn.addEventListener('click', function () {
+      const newStart = document.getElementById('new_start').value;
+      const newEnd = document.getElementById('new_end').value;
+      const fb = document.getElementById('edit-time-feedback');
+
+      if (!newStart || !newEnd) {
+        fb.style.display = 'block';
+        fb.style.background = '#FEF2F2';
+        fb.style.color = '#991B1B';
+        fb.textContent = '❌ Please fill in both start and end time.';
+        return;
+      }
+
+      if (new Date(newEnd) <= new Date(newStart)) {
+        fb.style.display = 'block';
+        fb.style.background = '#FEF2F2';
+        fb.style.color = '#991B1B';
+        fb.textContent = '❌ End time must be after start time.';
+        return;
+      }
+
+      saveTimeBtn.disabled = true;
+      saveTimeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+      fetch("{% url 'session_reschedule' session.pk %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ planned_start: newStart, planned_end: newEnd }),
+      })
+      .then(r => r.json())
+      .then(data => {
+        fb.style.display = 'block';
+        if (data.success) {
+          fb.style.background = '#D1FAE5';
+          fb.style.color = '#065F46';
+          fb.textContent = '✅ Time updated! Reloading...';
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          fb.style.background = '#FEF2F2';
+          fb.style.color = '#991B1B';
+          fb.textContent = '❌ ' + (data.error || 'Something went wrong.');
+          saveTimeBtn.disabled = false;
+          saveTimeBtn.innerHTML = '<i class="fas fa-save"></i> Save Time';
+        }
+      })
+      .catch(() => {
+        saveTimeBtn.disabled = false;
+        saveTimeBtn.innerHTML = '<i class="fas fa-save"></i> Save Time';
+      });
+    });
+  }
+
+});
+</script>
+{% endblock %}

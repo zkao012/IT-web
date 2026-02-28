@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}My Tasks — TrackIt{% endblock %}
+{% block page_title %}My Tasks{% endblock %}
+
+{% block content %}
+
+<!-- ===== 全局学习统计横幅 ===== -->
+<div class="trackit-card mb-4" style="padding:16px 24px;">
+  <div style="display:flex; gap:32px; align-items:center; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:24px;">🔥</span>
+      <div>
+        <div style="font-size:20px; font-weight:800; color:var(--orange);">{{ streak }}</div>
+        <div style="font-size:12px; color:var(--gray-400);">Day Streak</div>
+      </div>
+    </div>
+    <div style="width:1px; height:36px; background:var(--gray-100);"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:20px;">📅</span>
+      <div>
+        <div style="font-size:20px; font-weight:800; color:var(--gray-800);">{{ week_minutes }} min</div>
+        <div style="font-size:12px; color:var(--gray-400);">This Week</div>
+      </div>
+    </div>
+    <div style="width:1px; height:36px; background:var(--gray-100);"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:20px;">⚡</span>
+      <div>
+        <div style="font-size:20px; font-weight:800; color:var(--gray-800);">{{ today_minutes }} min</div>
+        <div style="font-size:12px; color:var(--gray-400);">Today</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 进行中的任务 ===== -->
+<div style="margin-bottom:40px;">
+  <div class="task-section-label">
+    <i class="fas fa-fire" style="color:#FF6B2C;"></i>
+    In Progress
+    <span class="task-count-badge">{{ in_progress|length }}</span>
+  </div>
+
+  {% if in_progress %}
+  <div class="sticky-grid">
+    {% for task in in_progress %}
+    {% with pct=task.progress_percent %}
+    <div class="sticky-note {% cycle 'sticky-color-0' 'sticky-color-1' 'sticky-color-2' 'sticky-color-3' %}">
+
+      <div class="sticky-pin"></div>
+
+      <!-- 分类 -->
+      <div class="sticky-category">
+        <i class="fas fa-tag"></i> {{ task.category|default:"Uncategorized" }}
+      </div>
+
+      <!-- 标题 -->
+      <div class="sticky-title">{{ task.title }}</div>
+
+      <!-- 描述 -->
+      {% if task.description %}
+      <div class="sticky-desc">{{ task.description }}</div>
+      {% endif %}
+
+      <!-- 单个 task 的近7天 streak -->
+      {% with streak=task.recent_streak %}
+      {% if streak > 0 %}
+      <div style="font-size:12px; color:var(--orange); margin-bottom:8px;">
+        📅 {{ streak }}/7 days this week
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <!-- 时间进度条 -->
+      <div class="sticky-progress-wrap">
+        <div style="font-size:11px; color:var(--gray-400); margin-bottom:4px;">🕐 Time Progress</div>
+        <div class="sticky-progress-bar">
+          <div class="sticky-progress-fill" style="width:{{ pct }}%;"></div>
+        </div>
+        <div class="sticky-progress-label">
+          {{ pct }}% · {{ task.total_actual_minutes }}/{{ task.target_minutes }} min
+          {% if task.extra_minutes %}
+          <span style="color:var(--orange); font-weight:600;"> ⚡ +{{ task.extra_minutes }} min extra</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- 学习质量 -->
+      {% with quality=task.average_quality %}
+      {% if quality > 0 %}
+      <div style="margin-top:8px;">
+        <div style="font-size:11px; color:var(--gray-400); margin-bottom:4px;">⭐ Avg Learning Quality</div>
+        <div class="sticky-progress-bar">
+          <div class="sticky-progress-fill" style="width:{{ quality }}%; background:#8B5CF6;"></div>
+        </div>
+        <div class="sticky-progress-label">{{ quality }}%</div>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <!-- 操作按钮 -->
+      <div class="sticky-actions">
+        <a href="{% url 'session_book' %}?task_id={{ task.pk }}" class="sticky-btn-book">
+          <i class="fas fa-calendar-plus"></i> Book Session
+        </a>
+        <a href="{% url 'task_delete' task.pk %}"
+           class="sticky-btn-delete"
+           onclick="return confirm('Delete \'{{ task.title }}\'?')">
+          <i class="fas fa-trash"></i>
+        </a>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="task-empty">
+    <div class="task-empty-icon">📝</div>
+    <p>No tasks yet. Create your first one!</p>
+    <a href="{% url 'task_create' %}" class="btn-orange">+ New Task</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ===== 已完成的任务 ===== -->
+{% if completed %}
+<div>
+  <div class="task-section-label">
+    <i class="fas fa-check-circle" style="color:#10B981;"></i>
+    Completed
+    <span class="task-count-badge" style="background:#D1FAE5; color:#065F46;">{{ completed|length }}</span>
+  </div>
+
+  <div class="sticky-grid">
+    {% for task in completed %}
+    <div class="sticky-note sticky-done">
+      <div class="sticky-pin sticky-pin-green"></div>
+      <div class="sticky-category">
+        <i class="fas fa-tag"></i> {{ task.category|default:"Uncategorized" }}
+      </div>
+      <div class="sticky-title" style="text-decoration:line-through; opacity:0.5;">
+        {{ task.title }}
+      </div>
+      <div class="sticky-progress-wrap">
+        <div class="sticky-progress-bar">
+          <div class="sticky-progress-fill" style="width:100%; background:#10B981;"></div>
+        </div>
+        <div class="sticky-progress-label" style="color:#10B981;">
+          ✅ {{ task.total_actual_minutes }} min · Goal reached!
+          {% if task.extra_minutes %}
+          <span style="color:var(--orange);"> ⚡ +{{ task.extra_minutes }} min extra</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="sticky-actions">
+        <a href="{% url 'task_delete' task.pk %}"
+           class="sticky-btn-delete"
+           onclick="return confirm('Delete \'{{ task.title }}\'?')">
+          <i class="fas fa-trash"></i>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
