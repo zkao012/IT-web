@@ -1,0 +1,213 @@
+/* ===== TrackIt Admin 白橙主题 强制覆盖 ===== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+body, * {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* 顶部导航 */
+.main-header.navbar {
+  background-color: #FF6B2C !important;
+  border-bottom: none !important;
+}
+
+.main-header .nav-link,
+.main-header .nav-link i,
+.main-header .form-control-navbar {
+  color: #ffffff !important;
+}
+
+/* Logo区域 */
+.main-header .brand-link,
+.main-sidebar .brand-link {
+  background-color: #E55A1F !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-bottom: none !important;
+}
+
+/* 侧边栏背景强制白色 */
+.main-sidebar {
+  background-color: #ffffff !important;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.08) !important;
+}
+
+.main-sidebar,
+.main-sidebar .sidebar,
+.sidebar {
+  background-color: #ffffff !important;
+}
+
+/* 侧边栏所有深色覆盖 */
+.sidebar-dark-primary,
+.sidebar-dark-warning,
+.sidebar-dark-info,
+.sidebar-dark-success,
+.sidebar-dark-danger {
+  background-color: #ffffff !important;
+}
+
+/* 用户面板 */
+.user-panel {
+  border-bottom: 1px solid #F3F4F6 !important;
+}
+
+.user-panel .info a {
+  color: #1F2937 !important;
+  font-weight: 600 !important;
+}
+
+/* 侧边栏导航文字 */
+.nav-sidebar .nav-link,
+.nav-sidebar .nav-link p,
+.nav-sidebar .nav-link i {
+  color: #4B5563 !important;
+  font-weight: 500 !important;
+}
+
+.nav-sidebar .nav-link:hover,
+.nav-sidebar .nav-link:hover p,
+.nav-sidebar .nav-link:hover i {
+  color: #FF6B2C !important;
+  background-color: #FFF4EF !important;
+}
+
+.nav-sidebar .nav-item.menu-open > .nav-link,
+.nav-sidebar .nav-link.active,
+.nav-sidebar .nav-link.active p,
+.nav-sidebar .nav-link.active i {
+  color: #FF6B2C !important;
+  background-color: #FFF4EF !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+/* 分类标题 */
+.nav-header {
+  color: #9CA3AF !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
+/* 内容区背景 */
+.content-wrapper {
+  background-color: #F9FAFB !important;
+}
+
+/* 页面标题栏 */
+.content-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #E5E7EB !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+
+.content-header h1 {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: #1F2937 !important;
+}
+
+/* 卡片 */
+.card {
+  border-radius: 14px !important;
+  border: 1px solid #E5E7EB !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05) !important;
+}
+
+.card-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  font-weight: 700 !important;
+  color: #1F2937 !important;
+  border-radius: 14px 14px 0 0 !important;
+}
+
+/* 按钮全部橙色 */
+.btn-primary,
+.btn-warning,
+input[type=submit] {
+  background-color: #FF6B2C !important;
+  border-color: #FF6B2C !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.btn-primary:hover,
+.btn-warning:hover {
+  background-color: #E55A1F !important;
+  border-color: #E55A1F !important;
+}
+
+/* 表格 */
+#result_list thead th {
+  background-color: #FFF4EF !important;
+  color: #FF6B2C !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-bottom: 2px solid #FF6B2C !important;
+}
+
+#result_list tbody tr:hover td {
+  background-color: #FFF4EF !important;
+}
+
+/* 输入框 */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea,
+.form-control {
+  border: 1.5px solid #E5E7EB !important;
+  border-radius: 9px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus {
+  border-color: #FF6B2C !important;
+  box-shadow: 0 0 0 3px rgba(255,107,44,0.1) !important;
+  outline: none !important;
+}
+
+/* Footer */
+.main-footer {
+  background: #ffffff !important;
+  border-top: 1px solid #E5E7EB !important;
+  color: #9CA3AF !important;
+  font-size: 12px !important;
+}
+
+/* 成功/错误消息 */
+.messagelist .success {
+  background: #ECFDF5 !important;
+  color: #065F46 !important;
+  border-left: 4px solid #10B981 !important;
+  border-radius: 8px !important;
+}
+
+.messagelist .error {
+  background: #FEF2F2 !important;
+  color: #991B1B !important;
+  border-left: 4px solid #EF4444 !important;
+  border-radius: 8px !important;
+}
+
+/* 分页橙色 */
+.pagination .page-item.active .page-link {
+  background-color: #FF6B2C !important;
+  border-color: #FF6B2C !important;
+}
+
+.page-link {
+  color: #FF6B2C !important;
+}

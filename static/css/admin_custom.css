@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+body, * {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* 品牌区深橙色（Jazzmin accent-orange 略浅） */
+body .main-header .brand-link,
+body .main-sidebar .brand-link {
+  background-color: #E55A1F;
+  font-weight: 800;
+}
+
+/* 卡片圆角 */
+body .card {
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+body .card-header {
+  border-radius: 14px 14px 0 0;
+}
+
+/* 表格表头橙色 */
+#result_list thead th {
+  background-color: #FFF4EF;
+  color: #FF6B2C;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #FF6B2C;
+}
+
+#result_list tbody tr:hover td {
+  background-color: #FFF4EF;
+}
+
+/* 输入框圆角 */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea,
+.form-control {
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+/* 消息提示 */
+.messagelist .success {
+  background: #ECFDF5;
+  color: #065F46;
+  border-left: 4px solid #10B981;
+  border-radius: 8px;
+}
+
+.messagelist .error {
+  background: #FEF2F2;
+  color: #991B1B;
+  border-left: 4px solid #EF4444;
+  border-radius: 8px;
+}
