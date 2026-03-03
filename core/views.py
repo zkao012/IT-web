@@ -289,11 +289,14 @@ def session_reschedule(request, pk):
         session.planned_end = new_end
 
         # Auto-update to in_progress if new start time has already passed
+        from django.utils.timezone import make_aware, is_naive
         now = timezone.now()
-        if session.status == 'pending' and new_start <= now:
-            session.status = 'in_progress'
-
-        session.save()
+        planned_start = session.planned_start
+        if is_naive(planned_start):
+             planned_start = make_aware(planned_start)
+        if session.status == 'pending' and planned_start <= now:
+             session.status = 'in_progress'
+             session.save()
         return JsonResponse({'success': True})
 
     except Exception as e:
