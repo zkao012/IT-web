@@ -13,7 +13,7 @@
 </head>
 <body>
 
-  <!-- ===== 顶部全站导航栏 ===== -->
+  <!-- ===== Global top navigation bar ===== -->
   <header class="global-nav" role="banner">
     <div class="global-nav-inner">
 
@@ -23,7 +23,7 @@
         <span>TrackIt</span>
       </a>
 
-      <!-- 全站模块导航 -->
+      <!-- Site-wide module navigation -->
       <nav class="global-links" role="navigation" aria-label="Main navigation">
         <a href="#" class="global-link" aria-label="Go to Dashboard">
           <i class="fas fa-home" aria-hidden="true"></i> Dashboard
@@ -48,7 +48,7 @@
         {% endif %}
       </nav>
 
-      <!-- 右侧用户信息 -->
+      <!-- Right side user info -->
       <div class="global-user">
         {% if user.is_authenticated %}
         <div class="global-user-avatar" aria-label="Logged in as {{ request.user.username }}">
@@ -64,14 +64,14 @@
     </div>
   </header>
 
-  <!-- ===== 页面主体 ===== -->
+  <!-- ===== Page body ===== -->
   <div class="page-wrapper">
 
-    <!-- 侧边栏（动态切换模块） -->
+    <!-- Sidebar (switches dynamically based on current module) -->
     <aside class="sidebar" role="complementary">
 
       {% if 'task' in request.resolver_match.url_name %}
-      <!-- ===== Tasks 侧边栏 ===== -->
+      <!-- Tasks sidebar -->
       <div class="sidebar-section-label">Tasks Module</div>
       <nav class="sidebar-nav" aria-label="Tasks navigation">
         <a href="{% url 'task_list' %}"
@@ -89,7 +89,7 @@
       <div class="sidebar-divider"></div>
       <div class="sidebar-section-label">Your Progress</div>
 
-      <!-- Task 统计小卡片 -->
+      <!-- Task stats mini card -->
       <div class="sidebar-stat-card">
         <i class="fas fa-fire" style="color:#FF6B2C;"></i>
         <div>
@@ -104,7 +104,7 @@
       </div>
 
       {% else %}
-      <!-- ===== Sessions 侧边栏 ===== -->
+      <!-- Sessions sidebar -->
       <div class="sidebar-section-label">Sessions Module</div>
       <nav class="sidebar-nav" aria-label="Sessions navigation">
         <a href="{% url 'session_list' %}"
@@ -139,10 +139,10 @@
 
     </aside>
 
-    <!-- 主内容区 -->
+    <!-- Main content area -->
     <div class="main-wrapper">
 
-      <!-- 面包屑 + 页面标题栏 -->
+      <!-- Breadcrumb and page title bar -->
       <div class="topbar" role="banner">
         <div>
           <div class="breadcrumb-nav" aria-label="Breadcrumb">
@@ -169,7 +169,7 @@
         {% endif %}
       </div>
 
-      <!-- 消息提示 -->
+      <!-- Alert messages -->
       {% for message in messages %}
       <div class="alert-banner alert-{{ message.tags }}" role="alert" aria-live="polite">
         <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"
@@ -178,12 +178,12 @@
       </div>
       {% endfor %}
 
-      <!-- 页面内容 -->
+      <!-- Page content -->
       <main class="content-area" role="main" id="main-content">
         {% block content %}{% endblock %}
       </main>
 
-      <!-- ===== Footer ===== -->
+      <!-- Footer -->
       <footer class="site-footer" role="contentinfo">
         <div class="footer-inner">
 
@@ -220,6 +220,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Date/time picker initialisation -->
   <script>
     flatpickr("input[type='datetime-local']", {
       enableTime: true,

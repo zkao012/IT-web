@@ -50,12 +50,8 @@ WSGI_APPLICATION = 'trackit.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'trackit_db',
-        'USER': 'root',
-        'PASSWORD': '111111',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -115,19 +111,19 @@ JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": False,
-    "accent": "accent-orange",
-    "navbar": "navbar-orange navbar-dark",
+    "brand_colour": "navbar-warning",
+    "accent": "accent-warning",
+    "navbar": "navbar-warning navbar-dark",
     "no_navbar_border": True,
-    "sidebar": "sidebar-light-orange",
+    "sidebar": "sidebar-light-warning",
     "sidebar_nav_small_text": False,
     "sidebar_nav_flat_style": True,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_compact_style": False,
     "layout_boxed": False,
     "footer_fixed": False,
-    "navbar_fixed": False,
-    "sidebar_fixed": False,
+    "navbar_fixed": True,
+    "sidebar_fixed": True,
     "theme": "default",
     "button_classes": {
         "primary": "btn-warning",
@@ -135,6 +131,6 @@ JAZZMIN_UI_TWEAKS = {
         "info": "btn-warning",
         "warning": "btn-warning",
         "danger": "btn-danger",
-        "success": "btn-warning",
+        "success": "btn-success",
     },
 }

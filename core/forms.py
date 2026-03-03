@@ -80,7 +80,7 @@ class SessionBookForm(forms.ModelForm):
             if end <= start:
                 raise forms.ValidationError("End time must be after start time.")
 
-            # 时间冲突检测
+            # Check for conflicting sessions in the same time slot
             if self.current_user:
                 conflicts = Session.objects.filter(
                     user=self.current_user,
@@ -94,7 +94,7 @@ class SessionBookForm(forms.ModelForm):
                         "This time slot conflicts with an existing session."
                     )
 
-        # 超额提示：用 in_progress + completed 的实际时长来判断（与 models 保持一致）
+        # Warn if session duration exceeds remaining target minutes
         if start and end and task:
             session_minutes = int((end - start).total_seconds() / 60)
             used_minutes = task.sessions.exclude(
@@ -109,6 +109,7 @@ class SessionBookForm(forms.ModelForm):
                 )
 
             if session_minutes > remaining:
+                # Store warning to display in template without blocking submission
                 self.overtime_warning = (
                     f'Heads up: this session ({session_minutes} min) exceeds your '
                     f'remaining target ({remaining} min) for "{task.title}". '

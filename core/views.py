@@ -24,12 +24,12 @@ def task_list(request):
     page = request.GET.get('page', 1)
     in_progress_page = paginator.get_page(page)
 
-    # 用范围查询避免 MySQL __date 过滤问题
+    # Use range queries to avoid __date filter issues with certain database backends
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # 全局连续学习 streak（最多往前查30天）
+    # Global learning streak — check up to 30 days back
     streak = 0
     for i in range(30):
         day_start = today_start - timezone.timedelta(days=i)
@@ -44,7 +44,7 @@ def task_list(request):
         else:
             break
 
-    # 本周已学时长
+    # Total minutes logged this week
     week_start = today_start - timezone.timedelta(days=today_start.weekday())
     week_minutes = Session.objects.filter(
         user=request.user,
@@ -54,7 +54,7 @@ def task_list(request):
         total=Sum('actual_minutes')
     )['total'] or 0
 
-    # 今日已学时长
+    # Total minutes logged today
     today_minutes = Session.objects.filter(
         user=request.user,
         planned_start__gte=today_start,
@@ -90,7 +90,7 @@ def task_create(request):
 @login_required
 def task_delete(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
-    # 删除 task 时所有关联 session 一起删
+    # Delete all associated sessions when a task is deleted
     task.sessions.all().delete()
     task.is_active = False
     task.save()
@@ -105,6 +105,7 @@ def session_list(request):
     status_filter = request.GET.get('status', '')
     now = timezone.now()
 
+    # Auto-update pending sessions to in_progress if start time has passed
     Session.objects.filter(
         user=request.user,
         status='pending',
@@ -123,6 +124,7 @@ def session_list(request):
 
 @login_required
 def session_book(request):
+    # Calculate remaining target minutes for each active task
     tasks_remaining = {}
     for task in request.user.tasks.filter(is_active=True):
         remaining = task.target_minutes - task.total_actual_minutes()
@@ -153,6 +155,7 @@ def session_book(request):
 def session_detail(request, pk):
     session = get_object_or_404(Session, pk=pk, user=request.user)
 
+    # Auto-update status to in_progress if start time has passed
     now = timezone.now()
     if session.status == 'pending' and session.planned_start <= now:
         session.status = 'in_progress'
@@ -188,7 +191,7 @@ def session_update_progress(request, pk):
         if actual_minutes < 0:
             return JsonResponse({'error': 'actual_minutes cannot be negative.'}, status=400)
 
-        # 实际时长上限：计划时长的3倍
+        # Cap actual minutes at 3x the planned duration
         max_minutes = session.planned_minutes() * 3
         if actual_minutes > max_minutes:
             return JsonResponse({'error': f'Time seems too high. Max allowed: {max_minutes} min (3x planned).'}, status=400)
@@ -200,7 +203,7 @@ def session_update_progress(request, pk):
         session.completion_percent = completion_percent
         session.notes = notes
 
-        # 普通保存 → in_progress，点 Mark as Complete → completed
+        # Regular save sets in_progress; Mark as Complete sets completed
         if mark_complete:
             session.status = 'completed'
         else:
@@ -239,6 +242,7 @@ def session_cancel(request, pk):
 @require_POST
 def session_delete(request, pk):
     session = get_object_or_404(Session, pk=pk, user=request.user)
+    # Only allow deletion of cancelled sessions
     if session.status == 'cancelled':
         session.delete()
         messages.success(request, 'Session deleted.')
@@ -266,12 +270,13 @@ def session_reschedule(request, pk):
         if new_end <= new_start:
             return JsonResponse({'error': 'End time must be after start time.'}, status=400)
 
+        # Make timezone-aware if naive datetime received
         if is_naive(new_start):
             new_start = make_aware(new_start)
         if is_naive(new_end):
             new_end = make_aware(new_end)
 
-        # 冲突检测
+        # Check for conflicting sessions in the new time slot
         conflicts = Session.objects.filter(
             user=request.user,
             planned_start__lt=new_end,
@@ -283,6 +288,7 @@ def session_reschedule(request, pk):
         session.planned_start = new_start
         session.planned_end = new_end
 
+        # Auto-update to in_progress if new start time has already passed
         now = timezone.now()
         if session.status == 'pending' and new_start <= now:
             session.status = 'in_progress'

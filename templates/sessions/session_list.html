@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<!-- 筛选标签 -->
+<!-- Filter tabs -->
 <div class="filter-tabs">
   <a href="{% url 'session_list' %}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
   <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">⏳ Pending</a>
@@ -13,7 +13,7 @@
   <a href="?status=cancelled" class="filter-tab {% if status_filter == 'cancelled' %}active{% endif %}">⬜ Cancelled</a>
 </div>
 
-<!-- Session 列表 -->
+<!-- Session list -->
 {% for session in sessions %}
 <div class="trackit-card mb-3" style="display:flex; flex-direction:row;">
   <div class="card-accent
@@ -36,7 +36,7 @@
       </span>
     </div>
 
-    <!-- 时间进度 -->
+    <!-- Progress bar -->
     <div class="progress-track">
       <div class="progress-fill" style="width:{{ session.completion_percent }}%"></div>
     </div>
@@ -44,7 +44,7 @@
       ⭐ Learning Quality: {{ session.completion_percent }}% · ⏱ {{ session.actual_minutes }} min logged
     </div>
 
-    <!-- 操作按钮 -->
+    <!-- Action buttons -->
     <div style="display:flex; gap:8px; margin-top:12px;">
       <a href="{% url 'session_detail' session.pk %}" class="btn-outline-primary-custom">
         <i class="fas fa-edit"></i> Update Progress

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<!-- ===== 全局学习统计横幅 ===== -->
+<!-- Global learning stats banner -->
 <div class="trackit-card mb-4" style="padding:16px 24px;">
   <div style="display:flex; gap:32px; align-items:center; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:8px;">
@@ -33,7 +33,7 @@
   </div>
 </div>
 
-<!-- ===== 进行中的任务 ===== -->
+<!-- In Progress tasks -->
 <div style="margin-bottom:40px;">
   <div class="task-section-label">
     <i class="fas fa-fire" style="color:#FF6B2C;"></i>
@@ -49,20 +49,20 @@
 
       <div class="sticky-pin"></div>
 
-      <!-- 分类 -->
+      <!-- Category label -->
       <div class="sticky-category">
         <i class="fas fa-tag"></i> {{ task.category|default:"Uncategorized" }}
       </div>
 
-      <!-- 标题 -->
+      <!-- Task title -->
       <div class="sticky-title">{{ task.title }}</div>
 
-      <!-- 描述 -->
+      <!-- Optional description -->
       {% if task.description %}
       <div class="sticky-desc">{{ task.description }}</div>
       {% endif %}
 
-      <!-- 单个 task 的近7天 streak -->
+      <!-- Per-task streak for the last 7 days -->
       {% with streak=task.recent_streak %}
       {% if streak > 0 %}
       <div style="font-size:12px; color:var(--orange); margin-bottom:8px;">
@@ -71,7 +71,7 @@
       {% endif %}
       {% endwith %}
 
-      <!-- 时间进度条 -->
+      <!-- Time progress bar -->
       <div class="sticky-progress-wrap">
         <div style="font-size:11px; color:var(--gray-400); margin-bottom:4px;">🕐 Time Progress</div>
         <div class="sticky-progress-bar">
@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <!-- 学习质量 -->
+      <!-- Average learning quality -->
       {% with quality=task.average_quality %}
       {% if quality > 0 %}
       <div style="margin-top:8px;">
@@ -98,7 +98,7 @@
       {% endif %}
       {% endwith %}
 
-      <!-- 操作按钮 -->
+      <!-- Action buttons -->
       <div class="sticky-actions">
         <a href="{% url 'session_book' %}?task_id={{ task.pk }}" class="sticky-btn-book">
           <i class="fas fa-calendar-plus"></i> Book Session
@@ -123,7 +123,7 @@
   {% endif %}
 </div>
 
-<!-- ===== 已完成的任务 ===== -->
+<!-- Completed tasks -->
 {% if completed %}
 <div>
   <div class="task-section-label">
@@ -136,9 +136,11 @@
     {% for task in completed %}
     <div class="sticky-note sticky-done">
       <div class="sticky-pin sticky-pin-green"></div>
+      <!-- Category label -->
       <div class="sticky-category">
         <i class="fas fa-tag"></i> {{ task.category|default:"Uncategorized" }}
       </div>
+      <!-- Strikethrough title for completed tasks -->
       <div class="sticky-title" style="text-decoration:line-through; opacity:0.5;">
         {{ task.title }}
       </div>
@@ -153,6 +155,7 @@
           {% endif %}
         </div>
       </div>
+      <!-- Delete button -->
       <div class="sticky-actions">
         <a href="{% url 'task_delete' task.pk %}"
            class="sticky-btn-delete"
