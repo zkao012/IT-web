@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'progress_app.apps.ProgressAppConfig',
 ]
 
 MIDDLEWARE = [
