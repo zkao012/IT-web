@@ -3,6 +3,6 @@ from .models import Progress
 
 @admin.register(Progress)
 class ProgressAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "title", "status", "completion_percent", "actual_minutes", "created_at")
-    list_filter = ("status",)
-    search_fields = ("title", "user__username", "user__email")
+    list_display = ("title", "user", "completed", "completion_percent", "created_at")
+    list_filter = ("completed",)
+    search_fields = ("title", "notes")
