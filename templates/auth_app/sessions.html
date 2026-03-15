@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Session Booking & Progress{% endblock %}
+{% block breadcrumb %}Session Booking & Progress{% endblock %}
+
+{% block content %}
+<h2>Session Booking & Progress</h2>
+
+<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:14px;">
+  <div class="muted">上半部分：Book Session 表单（成员 B/C 用 AJAX 做提交/刷新）</div>
+</div>
+
+<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
+  <div class="muted">下半部分：Sessions 列表 + Completion% + Edit（成员 C 做进度动态更新）</div>
+</div>
+{% endblock %}
