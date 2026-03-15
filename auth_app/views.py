@@ -23,7 +23,7 @@ def login_view(request):
             return redirect(next_url)
         error = "用户名或密码错误"
 
-    return render(request, "login.html", {"error": error})
+    return render(request, "auth_app/login.html", {"error": error})
 
 def logout_view(request):
     logout(request)
@@ -31,21 +31,21 @@ def logout_view(request):
 
 @login_required(login_url="login")
 def dashboard(request):
-    return render(request, "dashboard.html")
+    return render(request, "auth_app/dashboard.html")
 
 @login_required(login_url="login")
 def tasks(request):
-    return render(request, "tasks.html")
+    return render(request, "auth_app/tasks.html")
 
 
 @login_required(login_url="login")
 def sessions(request):
-    return render(request, "sessions.html")
+    return render(request, "auth_app/sessions.html")
 
 
 @staff_member_required(login_url="login")
 def admin_dashboard(request):
-    return render(request, "admin_dashboard.html")
+    return render(request, "auth_app/admin_dashboard.html")
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -69,4 +69,4 @@ def register_view(request):
             except IntegrityError:
                 error = "用户名已存在，请换一个"
 
-    return render(request, "register.html", {"error": error})
+    return render(request, "auth_app/register.html", {"error": error})
