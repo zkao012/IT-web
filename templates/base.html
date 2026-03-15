@@ -26,8 +26,10 @@
       <aside class="sidebar">
         <div class="brand">LABS</div>
         <div class="nav">
-          <a href="{% url 'tasks' %}">Tasks</a>
-          <a href="{% url 'sessions' %}">Sessions & Progress</a>
+          <a href="/tasks/">My Tasks</a>
+          <a href="/booking/tasks/">Book a Session</a>
+          <a href="/booking/sessions/">My Sessions</a>
+          <a href="/progress/">My Progress</a>
           {% if user.is_staff %}
             <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
           {% endif %}
