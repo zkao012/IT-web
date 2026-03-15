@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block head %}
+<style>
+  .auth-page{min-height:100vh;background:#fff;display:flex;flex-direction:column;}
+  .auth-topbar{height:56px;background:#f3f4f6;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;font-weight:600;}
+  .auth-main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .panel{width:520px;display:flex;flex-direction:column;align-items:center;}
+  .title{font-size:34px;font-weight:800;margin:0 0 18px 0;}
+  .card{width:420px;background:#fff;border:1px solid #d1d5db;border-radius:10px;padding:22px 24px;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+  .field{margin-bottom:14px;}
+  .label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:6px;}
+  .input{width:90%;height:44px;border:1px solid #d1d5db;border-radius:8px;padding:0 14px;font-size:15px;outline:none;}
+  .btn{width:100%;height:46px;border:none;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;cursor:pointer;margin-top:10px;}
+  .btn:hover{background:#4b5563;}
+  .error{color:#dc2626;font-size:13px;margin-top:10px;}
+  .links{margin-top:12px;text-align:center;}
+  .links a{color:#374151;text-decoration:none;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-topbar">Learning & Activity Booking System</div>
+
+  <div class="auth-main">
+    <div class="panel">
+      <h1 class="title">Register</h1>
+
+      <div class="card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="field">
+            <label class="label">Email</label>
+            <input class="input" name="email" placeholder="Email">
+          </div>
+
+          <div class="field">
+            <label class="label">Username</label>
+            <input class="input" name="username" placeholder="Username">
+          </div>
+
+          <div class="field">
+            <label class="label">Password</label>
+            <input class="input" type="password" name="password1" placeholder="Password">
+          </div>
+
+          <div class="field">
+            <label class="label">Confirm Password</label>
+            <input class="input" type="password" name="password2" placeholder="Confirm Password">
+          </div>
+
+          <button class="btn" type="submit">Create Account</button>
+
+          {% if error %}
+            <div class="error">{{ error }}</div>
+          {% endif %}
+        </form>
+
+        <div class="links">
+          <a href="{% url 'login' %}">Back to Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

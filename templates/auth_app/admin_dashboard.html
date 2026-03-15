@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block breadcrumb %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
+  <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
+    <div class="muted">User List（搜索/编辑/禁用等，后续实现）</div>
+  </div>
+
+  <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
+    <div class="muted">System Statistics（总用户/今日 session/活动数等）</div>
+  </div>
+</div>
+{% endblock %}
