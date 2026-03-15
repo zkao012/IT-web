@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>My Progress</title>
+</head>
+<body>
+  <h1>My Progress</h1>
+
+  <p>
+    Logged in as <b>{{ request.user.username }}</b>
+  </p>
+
+  <p>
+    <a href="{% url 'progress_app:add' %}">+ Add new task</a>
+  </p>
+
+  <h2>Pending Tasks</h2>
+  <ul>
+    {% for item in pending %}
+      <li>
+        <b>{{ item.title }}</b>
+
+        <form action="{% url 'progress_app:done' item.pk %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">✓ Done</button>
+        </form>
+
+        | <a href="{% url 'progress_app:edit' item.pk %}">Edit</a>
+        | <a href="{% url 'progress_app:delete' item.pk %}">Delete</a>
+      </li>
+    {% empty %}
+      <li>No pending tasks.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Completed Tasks</h2>
+  <ul>
+    {% for item in done %}
+      <li>
+        <b>{{ item.title }}</b> ✔ Completed
+      </li>
+    {% empty %}
+      <li>No completed tasks yet.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

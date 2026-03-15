@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Progress</title>
+</head>
+<body>
+  <h1>{% if mode == "add" %}Add Task{% else %}Edit Task{% endif %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <p>
+      <label for="{{ form.title.id_for_label }}">Title</label><br>
+      {{ form.title }}
+    </p>
+
+    <p>
+      <label for="{{ form.notes.id_for_label }}">Notes</label><br>
+      {{ form.notes }}
+    </p>
+
+    <button type="submit">Save</button>
+    <a href="{% url 'progress_app:list' %}">Back</a>
+  </form>
+</body>
+</html>
