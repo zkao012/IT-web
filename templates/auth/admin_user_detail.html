@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — TrackIt Admin{% endblock %}
+{% block page_title %}User: {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+
+<!-- User info card -->
+<div class="trackit-card mb-4" style="padding:22px 24px;">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div style="width:56px; height:56px; border-radius:50%; background:var(--orange-pale); color:var(--orange); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px;">
+      {{ profile_user.username|first|upper }}
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:20px; font-weight:800; color:var(--gray-800); display:flex; align-items:center; gap:10px;">
+        {{ profile_user.username }}
+        {% if profile_user.is_active %}
+          <span style="font-size:11px; background:#ECFDF5; color:#065F46; padding:3px 10px; border-radius:999px; font-weight:700;">Active</span>
+        {% else %}
+          <span style="font-size:11px; background:#FEF2F2; color:#991B1B; padding:3px 10px; border-radius:999px; font-weight:700;">Disabled</span>
+        {% endif %}
+      </div>
+      <div style="font-size:13px; color:var(--gray-400); margin-top:3px;">
+        {{ profile_user.email|default:"No email" }} · Joined {{ profile_user.date_joined|date:"d M Y" }}
+        {% if profile_user.last_login %} · Last login {{ profile_user.last_login|date:"d M Y H:i" }}{% endif %}
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <form method="post" action="{% url 'admin_user_toggle' profile_user.pk %}"
+            onsubmit="return confirm('{% if profile_user.is_active %}Disable{% else %}Enable{% endif %} this account?')">
+        {% csrf_token %}
+        <button type="submit" class="{% if profile_user.is_active %}btn-outline-danger-custom{% else %}btn-outline-primary-custom{% endif %}">
+          <i class="fas fa-{% if profile_user.is_active %}ban{% else %}check-circle{% endif %}"></i>
+          {% if profile_user.is_active %}Disable Account{% else %}Enable Account{% endif %}
+        </button>
+      </form>
+      <a href="{% url 'admin_user_list' %}" class="btn-gray">← Back</a>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div style="display:flex; gap:24px; margin-top:16px; padding-top:16px; border-top:1px solid var(--gray-100);">
+    <div style="text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:var(--orange);">{{ tasks|length }}</div>
+      <div style="font-size:12px; color:var(--gray-400);">Tasks</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:#3B82F6;">{{ sessions|length }}</div>
+      <div style="font-size:12px; color:var(--gray-400);">Recent Sessions</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:#10B981;">{{ tasks|length }}</div>
+      <div style="font-size:12px; color:var(--gray-400);">Active Tasks</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+  <!-- Tasks -->
+  <div class="trackit-card" style="padding:22px;">
+    <div style="font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:14px;">
+      <i class="fas fa-tasks" style="color:var(--orange);"></i> Tasks
+    </div>
+    {% for task in tasks %}
+    <div style="padding:10px 0; border-bottom:1px solid var(--gray-100);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <div style="font-size:13px; font-weight:700; color:var(--gray-800);">{{ task.title }}</div>
+        <div style="font-size:13px; font-weight:800; color:{% if task.progress_percent >= 100 %}#10B981{% else %}var(--orange){% endif %};">
+          {{ task.progress_percent }}%
+        </div>
+      </div>
+      <div style="height:5px; background:var(--gray-100); border-radius:999px; overflow:hidden;">
+        <div style="height:100%; width:{{ task.progress_percent }}%; background:{% if task.progress_percent >= 100 %}#10B981{% else %}var(--orange){% endif %}; border-radius:999px;"></div>
+      </div>
+      <div style="font-size:11px; color:var(--gray-400); margin-top:3px;">{{ task.total_actual_minutes }}/{{ task.target_minutes }} min</div>
+    </div>
+    {% empty %}
+    <div style="text-align:center; padding:24px; color:var(--gray-400); font-size:13px;">No tasks yet.</div>
+    {% endfor %}
+  </div>
+
+  <!-- Sessions -->
+  <div class="trackit-card" style="padding:22px;">
+    <div style="font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:14px;">
+      <i class="fas fa-calendar-check" style="color:var(--orange);"></i> Recent Sessions
+    </div>
+    {% for session in sessions %}
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--gray-100);">
+      <div style="width:4px; height:32px; border-radius:999px; flex-shrink:0;
+        background:{% if session.status == 'completed' %}#10B981{% elif session.status == 'in_progress' %}#3B82F6{% elif session.status == 'cancelled' %}#9CA3AF{% else %}#F59E0B{% endif %};">
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:13px; font-weight:600; color:var(--gray-800);">{{ session.task.title }}</div>
+        <div style="font-size:11px; color:var(--gray-400);">{{ session.planned_start|date:"d M Y · H:i" }}</div>
+      </div>
+      <span class="status-badge status-{{ session.status }}">{{ session.get_status_display }}</span>
+    </div>
+    {% empty %}
+    <div style="text-align:center; padding:24px; color:var(--gray-400); font-size:13px;">No sessions yet.</div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

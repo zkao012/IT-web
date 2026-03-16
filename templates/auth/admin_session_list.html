@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}All Sessions — TrackIt Admin{% endblock %}
+{% block page_title %}All Sessions{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<div class="trackit-card mb-4" style="padding:16px 22px;">
+  <form method="get" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="flex:1; min-width:160px;">
+      <label class="form-label">Filter by User</label>
+      <input type="text" name="user" class="form-control" placeholder="Username..." value="{{ user_filter }}">
+    </div>
+    <div style="flex:1; min-width:160px;">
+      <label class="form-label">Filter by Status</label>
+      <select name="status" class="form-control">
+        <option value="">All Statuses</option>
+        <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-orange" style="padding:10px 20px;">
+      <i class="fas fa-search"></i> Filter
+    </button>
+    {% if user_filter or status_filter %}
+      <a href="{% url 'admin_session_list' %}" class="btn-gray" style="padding:10px 16px;">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Sessions table -->
+<div class="trackit-card">
+  <div style="padding:14px 24px; border-bottom:1px solid var(--gray-100); font-size:13px; color:var(--gray-400);">
+    Showing {{ sessions|length }} session{{ sessions|length|pluralize }}
+  </div>
+
+  <div style="display:grid; grid-template-columns:2fr 1fr 2fr 1fr 80px; gap:12px; padding:10px 24px; background:var(--gray-50); font-size:11px; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.05em;">
+    <span>Task</span>
+    <span>User</span>
+    <span>Time</span>
+    <span>Status</span>
+    <span>Quality</span>
+  </div>
+
+  {% for session in sessions %}
+  <div style="display:grid; grid-template-columns:2fr 1fr 2fr 1fr 80px; gap:12px; padding:13px 24px; border-bottom:1px solid var(--gray-100); align-items:center;">
+
+    <div style="font-size:13px; font-weight:700; color:var(--gray-800);">{{ session.task.title }}</div>
+
+    <div>
+      <a href="{% url 'admin_user_detail' session.user.pk %}" style="font-size:13px; font-weight:600; color:var(--orange); text-decoration:none;">
+        {{ session.user.username }}
+      </a>
+    </div>
+
+    <div>
+      <div style="font-size:12px; color:var(--gray-700);">
+        {{ session.planned_start|date:"d M Y · H:i" }} → {{ session.planned_end|date:"H:i" }}
+      </div>
+      <div style="font-size:11px; color:var(--gray-400);">
+        {{ session.planned_minutes }} min planned · {{ session.actual_minutes }} min logged
+      </div>
+    </div>
+
+    <div>
+      <span class="status-badge status-{{ session.status }}">{{ session.get_status_display }}</span>
+    </div>
+
+    <div>
+      <div style="font-size:13px; font-weight:700; color:var(--gray-700);">{{ session.completion_percent }}%</div>
+      <div style="height:4px; background:var(--gray-100); border-radius:999px; overflow:hidden; margin-top:3px;">
+        <div style="height:100%; width:{{ session.completion_percent }}%; background:#8B5CF6; border-radius:999px;"></div>
+      </div>
+    </div>
+
+  </div>
+  {% empty %}
+  <div style="text-align:center; padding:48px; color:var(--gray-400);">No sessions found.</div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if sessions.has_other_pages %}
+<div class="pagination-wrap">
+  {% if sessions.has_previous %}
+    <a href="?page={{ sessions.previous_page_number }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+  {% endif %}
+  {% for num in sessions.paginator.page_range %}
+    {% if sessions.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+    {% elif num > sessions.number|add:'-3' and num < sessions.number|add:'3' %}
+      <a href="?page={{ num }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if sessions.has_next %}
+    <a href="?page={{ sessions.next_page_number }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

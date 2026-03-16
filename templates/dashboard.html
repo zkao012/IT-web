@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — TrackIt{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stats banner -->
+<div class="trackit-card mb-4" style="padding:20px 28px;">
+  <div style="display:flex; gap:0; align-items:stretch; flex-wrap:wrap;">
+
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px 8px 0;">
+      <span style="font-size:28px;">🔥</span>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--orange); line-height:1;">{{ streak }}</div>
+        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Day Streak</div>
+      </div>
+    </div>
+
+    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
+
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px;">
+      <span style="font-size:24px;">📅</span>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--gray-800); line-height:1;">
+          {{ week_minutes }}<span style="font-size:14px; color:var(--gray-400); font-weight:600;"> min</span>
+        </div>
+        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">This Week</div>
+      </div>
+    </div>
+
+    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
+
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px;">
+      <span style="font-size:24px;">⚡</span>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--gray-800); line-height:1;">
+          {{ today_minutes }}<span style="font-size:14px; color:var(--gray-400); font-weight:600;"> min</span>
+        </div>
+        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Today</div>
+      </div>
+    </div>
+
+    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
+
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 0 8px 36px;">
+      <span style="font-size:24px;">✅</span>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:#10B981; line-height:1;">{{ completed_count }}</div>
+        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Tasks Done</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if motivation %}
+<div class="motivation-banner">
+  <span style="font-size:18px;">{{ motivation|slice:"-2:" }}</span>
+  <span>{{ motivation|slice:":-2" }}</span>
+</div>
+{% endif %}
+
+<!-- Active Tasks — sticky note style -->
+<div style="margin-bottom:32px;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+    <h2 style="font-size:16px; font-weight:800; color:var(--gray-800); margin:0; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-fire" style="color:#FF6B2C; font-size:14px;"></i>
+      Active Tasks
+      <span class="task-count-badge">{{ active_tasks|length }}</span>
+    </h2>
+    <a href="{% url 'task_list' %}" style="font-size:13px; font-weight:600; color:var(--orange); text-decoration:none;">
+      View all <i class="fas fa-arrow-right" style="font-size:11px;"></i>
+    </a>
+  </div>
+
+  {% if active_tasks %}
+    <div class="sticky-grid">
+      {% for task in active_tasks %}
+      {% with pct=task.progress_percent %}
+      <div class="sticky-note">
+
+        <div class="sticky-pin"></div>
+
+        <div class="sticky-category">
+          <i class="fas fa-tag"></i> {{ task.category|default:"Uncategorized" }}
+        </div>
+
+        <div class="sticky-title">{{ task.title }}</div>
+
+        {% if task.description %}
+          <div class="sticky-desc">{{ task.description|truncatechars:60 }}</div>
+        {% endif %}
+
+        {% if task.recent_streak > 0 %}
+          <div style="font-size:12px; color:var(--orange); margin-bottom:8px; font-weight:600;">
+            📅 {{ task.recent_streak }}/7 days this week
+          </div>
+        {% endif %}
+
+        <div class="sticky-progress-wrap">
+          <div style="font-size:11px; color:var(--gray-400); margin-bottom:4px;">🕐 Time Progress</div>
+          <div class="sticky-progress-bar">
+            <div class="sticky-progress-fill" style="width:{{ pct }}%;"
+                 role="progressbar" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <div class="sticky-progress-label">
+            {{ pct }}% · {{ task.total_actual_minutes }}/{{ task.target_minutes }} min
+            {% if task.extra_minutes %}
+              <span style="color:var(--orange); font-weight:600;"> ⚡ +{{ task.extra_minutes }} min</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="sticky-actions">
+          <a href="{% url 'session_book' %}?task_id={{ task.pk }}" class="sticky-btn-book">
+            <i class="fas fa-calendar-plus"></i> Book Session
+          </a>
+        </div>
+
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="task-empty">
+      <div class="task-empty-icon">📝</div>
+      <p style="font-weight:700; color:#374151; margin-bottom:4px;">No active tasks yet</p>
+      <p style="font-size:13px; color:var(--gray-400); margin-bottom:16px;">Create your first task to start tracking</p>
+      <a href="{% url 'task_create' %}" class="btn-orange">+ New Task</a>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Recent Sessions -->
+<div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+    <h2 style="font-size:16px; font-weight:800; color:var(--gray-800); margin:0; display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-calendar-check" style="color:#3B82F6; font-size:14px;"></i>
+      Recent Sessions
+    </h2>
+    <a href="{% url 'session_list' %}" style="font-size:13px; font-weight:600; color:var(--orange); text-decoration:none;">
+      View all <i class="fas fa-arrow-right" style="font-size:11px;"></i>
+    </a>
+  </div>
+
+  {% if recent_sessions %}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      {% for session in recent_sessions %}
+      <div class="trackit-card" style="display:flex; overflow:hidden;">
+        <div style="width:5px; flex-shrink:0; background:
+          {% if session.status == 'completed' %}#10B981
+          {% elif session.status == 'in_progress' %}#3B82F6
+          {% elif session.status == 'cancelled' %}#9CA3AF
+          {% else %}#F59E0B{% endif %};"></div>
+        <div style="padding:14px 18px; flex:1; display:flex; align-items:center; gap:16px; min-width:0;">
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:14px; font-weight:700; color:var(--gray-800); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px;">
+              {{ session.task.title }}
+            </div>
+            <div style="font-size:12px; color:var(--gray-400);">
+              <i class="fas fa-clock" style="font-size:11px;"></i>
+              {{ session.planned_start|date:"M d, Y · H:i" }} → {{ session.planned_end|date:"H:i" }}
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+            <span class="status-badge status-{{ session.status }}">
+              {{ session.get_status_display }}
+            </span>
+            {% if session.status != 'cancelled' %}
+            <a href="{% url 'session_detail' session.pk %}"
+               style="font-size:13px; font-weight:600; color:var(--orange); text-decoration:none; white-space:nowrap;">
+              Update →
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="task-empty">
+      <div class="task-empty-icon">📆</div>
+      <p style="font-weight:700; color:#374151; margin-bottom:4px;">No sessions yet</p>
+      <p style="font-size:13px; color:var(--gray-400); margin-bottom:16px;">Book a session to start logging your study time</p>
+      <a href="{% url 'session_book' %}" class="btn-orange">+ Book a Session</a>
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

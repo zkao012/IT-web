@@ -40,7 +40,7 @@
     </div>
 
     {% if form.non_field_errors %}
-    <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px;">
+    <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px;" role="alert">
       {% for error in form.non_field_errors %}{{ error }}{% endfor %}
     </div>
     {% endif %}
@@ -58,21 +58,18 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
-  //  Get the remaining time of each task from the backend.
   const tasksRemaining = {{ tasks_remaining|safe }};
-
   const form = document.getElementById('booking-form');
 
   form.addEventListener('submit', function (e) {
-    const taskId = parseInt(document.querySelector('[name=planned_task]') 
-                   ? document.querySelector('[name=planned_task]').value 
-                   : document.querySelector('[name=task]').value);
+    // Fix: correct field name is 'task' not 'planned_task'
+    const taskSelect = document.querySelector('[name=task]');
     const startVal = document.querySelector('[name=planned_start]').value;
     const endVal = document.querySelector('[name=planned_end]').value;
 
-    if (!startVal || !endVal || !taskId) return;
+    if (!taskSelect || !startVal || !endVal) return;
 
+    const taskId = parseInt(taskSelect.value);
     const start = new Date(startVal);
     const end = new Date(endVal);
     const sessionMinutes = Math.round((end - start) / 60000);
@@ -89,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
-
 });
 </script>
 {% endblock %}

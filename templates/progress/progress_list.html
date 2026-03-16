@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}My Progress — TrackIt{% endblock %}
+{% block page_title %}My Progress{% endblock %}
+
+{% block content %}
+
+<!-- In Progress tasks -->
+<div class="mb-4">
+  <div class="section-header">
+    <span>
+      <i class="fas fa-fire" style="color:#FF6B2C;"></i> In Progress
+      <span class="count-badge">{{ pending|length }}</span>
+    </span>
+  </div>
+
+  {% if pending %}
+    <div class="row g-3">
+      {% for task in pending %}
+      <div class="col-12">
+        <div class="content-card">
+          <div class="d-flex align-items-start gap-3 p-4">
+
+            <div style="flex:1; min-width:0;">
+              {% if task.category %}
+                <div style="font-size:11px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">
+                  <i class="fas fa-tag"></i> {{ task.category.name }}
+                </div>
+              {% endif %}
+              <h3 style="font-size:17px; font-weight:800; color:#111827; margin-bottom:4px;">{{ task.title }}</h3>
+              {% if task.description %}
+                <p style="font-size:13px; color:#6B7280; margin-bottom:12px;">{{ task.description }}</p>
+              {% endif %}
+
+              <!-- Progress bar -->
+              <div style="margin-bottom:6px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280; margin-bottom:4px;">
+                  <span>Time Progress</span>
+                  <span>{{ task.progress_percent }}%</span>
+                </div>
+                <div class="progress" style="height:8px; border-radius:999px;">
+                  <div class="progress-bar" role="progressbar"
+                       style="width:{{ task.progress_percent }}%; background:#FF6B2C; border-radius:999px;"
+                       aria-valuenow="{{ task.progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stats row -->
+              <div class="d-flex flex-wrap gap-3 mt-2" style="font-size:12px; color:#9CA3AF;">
+                <span><i class="fas fa-clock"></i> {{ task.total_actual_minutes }}/{{ task.target_minutes }} min</span>
+                <span><i class="fas fa-star"></i> Avg Quality: {{ task.average_quality }}%</span>
+                <span><i class="fas fa-fire"></i> {{ task.recent_streak }} day streak</span>
+                {% if task.extra_minutes > 0 %}
+                  <span style="color:#10B981;"><i class="fas fa-bolt"></i> +{{ task.extra_minutes }} extra min</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2" style="flex-shrink:0;">
+              <a href="{% url 'session_book' %}?task_id={{ task.pk }}" class="btn-orange" style="font-size:13px; padding:8px 14px;">
+                <i class="fas fa-calendar-plus"></i> Book Session
+              </a>
+              <a href="{% url 'task_delete' task.pk %}" class="btn-danger-outline" style="font-size:13px; padding:8px 14px; text-align:center;">
+                <i class="fas fa-trash"></i> Delete
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-rocket" style="font-size:32px; color:#FF6B2C; margin-bottom:12px; display:block;"></i>
+      <p style="font-weight:700; color:#374151; margin-bottom:6px;">No tasks in progress</p>
+      <p style="font-size:14px; color:#9CA3AF; margin-bottom:16px;">Create a task and start booking sessions!</p>
+      <a href="{% url 'task_create' %}" class="btn-orange">
+        <i class="fas fa-plus"></i> New Task
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Completed tasks -->
+<div>
+  <div class="section-header">
+    <span>
+      <i class="fas fa-check-circle" style="color:#10B981;"></i> Completed
+      <span class="count-badge" style="background:#D1FAE5; color:#065F46;">{{ done|length }}</span>
+    </span>
+  </div>
+
+  {% if done %}
+    <div class="row g-3">
+      {% for task in done %}
+      <div class="col-12">
+        <div class="content-card" style="opacity:0.8;">
+          <div class="d-flex align-items-center gap-3 p-4">
+            <div style="width:36px; height:36px; border-radius:50%; background:#D1FAE5; color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <i class="fas fa-check"></i>
+            </div>
+            <div style="flex:1; min-width:0;">
+              {% if task.category %}
+                <div style="font-size:11px; font-weight:700; color:#9CA3AF; text-transform:uppercase;">{{ task.category.name }}</div>
+              {% endif %}
+              <div style="font-weight:700; color:#374151; text-decoration:line-through;">{{ task.title }}</div>
+              <div style="font-size:12px; color:#9CA3AF;">
+                {{ task.total_actual_minutes }} min logged · Goal reached!
+                {% if task.extra_minutes > 0 %} · +{{ task.extra_minutes }} extra min{% endif %}
+              </div>
+            </div>
+            <div style="flex-shrink:0;">
+              <span class="badge rounded-pill" style="background:#D1FAE5; color:#065F46; font-size:12px; padding:6px 12px;">
+                <i class="fas fa-check-circle"></i> Done
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div style="text-align:center; padding:24px; color:#9CA3AF; font-size:14px;">
+      Completed tasks will appear here.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

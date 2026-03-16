@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Users — TrackIt Admin{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block content %}
+
+<div class="trackit-card">
+  <div style="padding:18px 24px; border-bottom:1px solid var(--gray-100); display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-size:14px; font-weight:800; color:var(--gray-800);">
+      All Users
+      <span style="background:#FFE7D6; color:var(--orange); font-size:12px; padding:2px 8px; border-radius:999px; margin-left:6px;">{{ users|length }}</span>
+    </div>
+  </div>
+
+  <!-- Table header -->
+  <div style="display:grid; grid-template-columns:2fr 2fr 1fr 1fr 1fr 100px; gap:12px; padding:10px 24px; background:var(--gray-50); font-size:11px; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.05em;">
+    <span>User</span>
+    <span>Email</span>
+    <span>Tasks</span>
+    <span>Sessions</span>
+    <span>Joined</span>
+    <span>Status</span>
+  </div>
+
+  {% for u in users %}
+  <div style="display:grid; grid-template-columns:2fr 2fr 1fr 1fr 1fr 100px; gap:12px; padding:14px 24px; border-bottom:1px solid var(--gray-100); align-items:center;">
+
+    <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+      <div style="width:34px; height:34px; border-radius:50%; background:{% if u.is_active %}var(--orange-pale){% else %}var(--gray-100){% endif %}; color:{% if u.is_active %}var(--orange){% else %}var(--gray-400){% endif %}; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; flex-shrink:0;">
+        {{ u.username|first|upper }}
+      </div>
+      <div style="min-width:0;">
+        <a href="{% url 'admin_user_detail' u.pk %}" style="font-size:13px; font-weight:700; color:var(--gray-800); text-decoration:none;">
+          {{ u.username }}
+        </a>
+      </div>
+    </div>
+
+    <div style="font-size:12px; color:var(--gray-400); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+      {{ u.email|default:"—" }}
+    </div>
+
+    <div style="font-size:13px; font-weight:600; color:var(--gray-700);">{{ u.tasks.count }}</div>
+    <div style="font-size:13px; font-weight:600; color:var(--gray-700);">{{ u.sessions.count }}</div>
+    <div style="font-size:12px; color:var(--gray-400);">{{ u.date_joined|date:"d M Y" }}</div>
+
+    <div style="display:flex; align-items:center; gap:8px;">
+      {% if u.is_active %}
+        <span style="font-size:11px; background:#ECFDF5; color:#065F46; padding:3px 8px; border-radius:999px; font-weight:700;">Active</span>
+      {% else %}
+        <span style="font-size:11px; background:#FEF2F2; color:#991B1B; padding:3px 8px; border-radius:999px; font-weight:700;">Disabled</span>
+      {% endif %}
+      <form method="post" action="{% url 'admin_user_toggle' u.pk %}"
+            onsubmit="return confirm('{% if u.is_active %}Disable{% else %}Enable{% endif %} {{ u.username }}?')"
+            style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="background:none; border:none; cursor:pointer; font-size:13px; color:{% if u.is_active %}#EF4444{% else %}#10B981{% endif %}; padding:0;" title="{% if u.is_active %}Disable{% else %}Enable{% endif %}">
+          <i class="fas fa-{% if u.is_active %}ban{% else %}check-circle{% endif %}"></i>
+        </button>
+      </form>
+    </div>
+
+  </div>
+  {% empty %}
+  <div style="text-align:center; padding:48px; color:var(--gray-400);">No users yet.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}All Tasks — TrackIt Admin{% endblock %}
+{% block page_title %}All Tasks{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<div class="trackit-card mb-4" style="padding:16px 22px;">
+  <form method="get" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="flex:1; min-width:160px;">
+      <label class="form-label">Filter by User</label>
+      <input type="text" name="user" class="form-control" placeholder="Username..." value="{{ user_filter }}">
+    </div>
+    <div style="flex:1; min-width:160px;">
+      <label class="form-label">Filter by Category</label>
+      <select name="category" class="form-control">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.pk }}" {% if category_filter == cat.pk|stringformat:"s" %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-orange" style="padding:10px 20px;">
+      <i class="fas fa-search"></i> Filter
+    </button>
+    {% if user_filter or category_filter %}
+      <a href="{% url 'admin_task_list' %}" class="btn-gray" style="padding:10px 16px;">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Tasks table -->
+<div class="trackit-card">
+  <div style="padding:14px 24px; border-bottom:1px solid var(--gray-100); font-size:13px; color:var(--gray-400);">
+    Showing {{ tasks|length }} task{{ tasks|length|pluralize }}
+  </div>
+
+  <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 80px; gap:12px; padding:10px 24px; background:var(--gray-50); font-size:11px; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.05em;">
+    <span>Task</span>
+    <span>User</span>
+    <span>Category</span>
+    <span>Progress</span>
+    <span>Created</span>
+  </div>
+
+  {% for task in tasks %}
+  <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 80px; gap:12px; padding:13px 24px; border-bottom:1px solid var(--gray-100); align-items:center;">
+
+    <div>
+      <div style="font-size:13px; font-weight:700; color:var(--gray-800);">
+        {{ task.title }}
+        {% if not task.is_active %}
+          <span style="font-size:10px; background:var(--gray-100); color:var(--gray-400); padding:1px 6px; border-radius:999px; margin-left:4px;">Inactive</span>
+        {% endif %}
+      </div>
+      {% if task.description %}
+        <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">{{ task.description|truncatechars:40 }}</div>
+      {% endif %}
+    </div>
+
+    <div>
+      <a href="{% url 'admin_user_detail' task.user.pk %}" style="font-size:13px; font-weight:600; color:var(--orange); text-decoration:none;">
+        {{ task.user.username }}
+      </a>
+    </div>
+
+    <div style="font-size:12px; color:var(--gray-600);">
+      {{ task.category|default:"—" }}
+    </div>
+
+    <div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="flex:1; height:6px; background:var(--gray-100); border-radius:999px; overflow:hidden;">
+          <div style="height:100%; width:{{ task.progress_percent }}%; background:{% if task.progress_percent >= 100 %}#10B981{% else %}var(--orange){% endif %}; border-radius:999px;"></div>
+        </div>
+        <span style="font-size:12px; font-weight:700; color:{% if task.progress_percent >= 100 %}#10B981{% else %}var(--gray-600){% endif %}; white-space:nowrap;">
+          {{ task.progress_percent }}%
+        </span>
+      </div>
+      <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">{{ task.total_actual_minutes }}/{{ task.target_minutes }} min</div>
+    </div>
+
+    <div style="font-size:11px; color:var(--gray-400);">{{ task.created_at|date:"d M Y" }}</div>
+
+  </div>
+  {% empty %}
+  <div style="text-align:center; padding:48px; color:var(--gray-400);">No tasks found.</div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if tasks.has_other_pages %}
+<div class="pagination-wrap">
+  {% if tasks.has_previous %}
+    <a href="?page={{ tasks.previous_page_number }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}" class="page-btn">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+  {% endif %}
+  {% for num in tasks.paginator.page_range %}
+    {% if tasks.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+    {% elif num > tasks.number|add:'-3' and num < tasks.number|add:'3' %}
+      <a href="?page={{ num }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}" class="page-btn">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if tasks.has_next %}
+    <a href="?page={{ tasks.next_page_number }}{% if user_filter %}&user={{ user_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}" class="page-btn">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

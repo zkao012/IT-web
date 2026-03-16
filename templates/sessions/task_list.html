@@ -4,35 +4,6 @@
 
 {% block content %}
 
-<!-- Global learning stats banner -->
-<div class="trackit-card mb-4" style="padding:16px 24px;">
-  <div style="display:flex; gap:32px; align-items:center; flex-wrap:wrap;">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:24px;">🔥</span>
-      <div>
-        <div style="font-size:20px; font-weight:800; color:var(--orange);">{{ streak }}</div>
-        <div style="font-size:12px; color:var(--gray-400);">Day Streak</div>
-      </div>
-    </div>
-    <div style="width:1px; height:36px; background:var(--gray-100);"></div>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:20px;">📅</span>
-      <div>
-        <div style="font-size:20px; font-weight:800; color:var(--gray-800);">{{ week_minutes }} min</div>
-        <div style="font-size:12px; color:var(--gray-400);">This Week</div>
-      </div>
-    </div>
-    <div style="width:1px; height:36px; background:var(--gray-100);"></div>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:20px;">⚡</span>
-      <div>
-        <div style="font-size:20px; font-weight:800; color:var(--gray-800);">{{ today_minutes }} min</div>
-        <div style="font-size:12px; color:var(--gray-400);">Today</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- In Progress tasks -->
 <div style="margin-bottom:40px;">
   <div class="task-section-label">
@@ -103,6 +74,9 @@
         <a href="{% url 'session_book' %}?task_id={{ task.pk }}" class="sticky-btn-book">
           <i class="fas fa-calendar-plus"></i> Book Session
         </a>
+        <a href="{% url 'task_edit' task.pk %}" class="sticky-btn-delete" title="Edit task">
+          <i class="fas fa-edit"></i>
+        </a>
         <a href="{% url 'task_delete' task.pk %}"
            class="sticky-btn-delete"
            onclick="return confirm('Delete \'{{ task.title }}\'?')">
@@ -119,6 +93,35 @@
     <div class="task-empty-icon">📝</div>
     <p>No tasks yet. Create your first one!</p>
     <a href="{% url 'task_create' %}" class="btn-orange">+ New Task</a>
+  </div>
+  {% endif %}
+
+  <!-- Pagination -->
+  {% if in_progress.has_other_pages %}
+  <div class="pagination-wrap" role="navigation" aria-label="Pagination">
+    {% if in_progress.has_previous %}
+      <a href="?page={{ in_progress.previous_page_number }}" class="page-btn">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+    {% else %}
+      <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+    {% endif %}
+
+    {% for num in in_progress.paginator.page_range %}
+      {% if in_progress.number == num %}
+        <span class="page-btn active">{{ num }}</span>
+      {% elif num > in_progress.number|add:'-3' and num < in_progress.number|add:'3' %}
+        <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if in_progress.has_next %}
+      <a href="?page={{ in_progress.next_page_number }}" class="page-btn">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    {% else %}
+      <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+    {% endif %}
   </div>
   {% endif %}
 </div>

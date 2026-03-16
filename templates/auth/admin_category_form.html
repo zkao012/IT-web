@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'create' %}New Category{% else %}Edit Category{% endif %} — TrackIt Admin{% endblock %}
+{% block page_title %}{% if mode == 'create' %}New Category{% else %}Edit Category{% endif %}{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h4>{% if mode == 'create' %}➕ Create Category{% else %}✏️ Edit Category{% endif %}</h4>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="margin-bottom:16px;">
+      <label class="form-label">Name *</label>
+      <input type="text" name="name" class="form-control"
+             value="{% if category %}{{ category.name }}{% endif %}"
+             placeholder="e.g. Programming" required>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label class="form-label">Description</label>
+      <textarea name="description" class="form-control" rows="3"
+                placeholder="Optional description">{% if category %}{{ category.description }}{% endif %}</textarea>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div style="background:#FEF2F2; color:#991B1B; padding:10px 14px; border-radius:10px; margin-bottom:16px; font-size:13px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn-orange" style="flex:1; justify-content:center;">
+        <i class="fas fa-check"></i> {% if mode == 'create' %}Create{% else %}Save Changes{% endif %}
+      </button>
+      <a href="{% url 'admin_category_list' %}" class="btn-gray">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
