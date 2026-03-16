@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- Platform stats -->
-<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
+<div class="admin-stats-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
 
   <div class="trackit-card" style="padding:20px 22px;">
     <div style="font-size:12px; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;">
@@ -63,7 +63,7 @@
 </div>
 
 <!-- Weekly sessions chart + Recent activity -->
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+<div class="admin-charts-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
 
   <div class="trackit-card" style="padding:22px;">
     <div style="font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:16px;">
@@ -126,6 +126,15 @@
   {% endfor %}
 </div>
 
+{% endblock %}
+
+{% block head_extra %}
+<style>
+@media (max-width: 768px) {
+  .admin-stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .admin-charts-grid { grid-template-columns: 1fr !important; }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
