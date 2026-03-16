@@ -540,8 +540,9 @@ body {
   .global-links.open { display: flex; }
   #mobile-menu-btn { display: block !important; }
   .global-username { display: none; }
+  .icon-sidebar { display: none !important; }
+  .main-wrapper { margin-left: 0 !important; max-width: 100%; }
   .page-wrapper { padding: 0; }
-  .main-wrapper { max-width: 100%; }
 }
 
 /* ===== Focus visibility (accessibility) ===== */
