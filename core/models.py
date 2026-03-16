@@ -31,24 +31,24 @@ class Task(models.Model):
         return self.title
 
     def total_actual_minutes(self):
-        """Total minutes from in_progress and completed sessions"""
+        """统计 in_progress + completed 的 session 时长"""
         return self.sessions.exclude(
             status__in=['cancelled', 'pending']
         ).aggregate(total=Sum('actual_minutes'))['total'] or 0
 
     def progress_percent(self):
-        """Overall task progress based on time logged, capped at 100%"""
+        """基于时间的任务进度，最多100%"""
         if self.target_minutes == 0:
             return 0
         return min(int(self.total_actual_minutes() / self.target_minutes * 100), 100)
 
     def extra_minutes(self):
-        """Minutes logged beyond the target, returns 0 if not exceeded"""
+        """超出目标时长，未超出返回0"""
         extra = self.total_actual_minutes() - self.target_minutes
         return extra if extra > 0 else 0
 
     def average_quality(self):
-        """Average completion percent across all valid sessions"""
+        """所有有效 session 的平均学习质量"""
         result = self.sessions.exclude(
             status__in=['cancelled', 'pending']
         ).exclude(
@@ -57,7 +57,7 @@ class Task(models.Model):
         return round(result) if result else 0
 
     def recent_streak(self):
-        """Number of consecutive days with a session in the last 7 days"""
+        """最近7天内连续有 session 的天数，用范围查询避免 MySQL __date 问题"""
         now = timezone.now()
         streak = 0
         for i in range(7):
@@ -80,7 +80,6 @@ class Task(models.Model):
         return streak
 
     def is_completed(self):
-        """Returns True if task progress has reached or exceeded 100%"""
         return self.progress_percent() >= 100
 
 
@@ -103,7 +102,7 @@ class Session(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def planned_minutes(self):
-        """Planned duration in minutes"""
+        """计划时长（分钟）"""
         return int((self.planned_end - self.planned_start).total_seconds() / 60)
 
     def __str__(self):

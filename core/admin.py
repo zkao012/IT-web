@@ -6,6 +6,7 @@ from django.utils.html import format_html
 from .models import Category, Task, Session
 
 admin.site.unregister(User)
+
 admin.site.unregister(Group)
 
 @admin.register(User)
@@ -14,8 +15,8 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('is_active', 'is_staff')
     search_fields = ('username', 'email')
     ordering = ('-date_joined',)
-
-    # Only keep essential fields, remove unnecessary tabs
+    
+    # 只保留必要字段，去掉多余 tab
     fieldsets = (
         ('Account', {'fields': ('username', 'email', 'password')}),
         ('Status', {'fields': ('is_active', 'is_staff')}),
@@ -25,13 +26,11 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'email', 'password1', 'password2', 'is_staff'),
         }),
     )
-
+    
     def has_delete_permission(self, request, obj=None):
-        # Prevent admin from deleting their own account
         if obj is not None and obj == request.user:
             return False
         return True
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -39,7 +38,7 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     ordering = ('name',)
     readonly_fields = ('created_at',)
-    actions = None
+    actions = None 
 
     def task_count(self, obj):
         return format_html('<b>{}</b>', obj.task_set.count())
@@ -60,16 +59,14 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'category', 'is_active', 'created_at')
     list_filter = ('is_active', 'category')
     search_fields = ('title', 'user__username')
-    readonly_fields = ('user', 'title', 'description', 'category',
+    readonly_fields = ('user', 'title', 'description', 'category', 
                        'target_minutes', 'is_active', 'created_at')
 
     def has_add_permission(self, request):
-        # Admin cannot create tasks directly
-        return False
+        return False  # 管理员不能新建
 
     def has_delete_permission(self, request, obj=None):
-        # Admin cannot delete tasks
-        return False
+        return False  # 管理员不能删除
 
 
 @admin.register(Session)
@@ -78,13 +75,11 @@ class SessionAdmin(admin.ModelAdmin):
     list_filter = ('status', 'user')
     search_fields = ('task__title', 'user__username')
     readonly_fields = ('task', 'user', 'planned_start', 'planned_end',
-                       'actual_minutes', 'completion_percent', 'status',
+                       'actual_minutes', 'completion_percent', 'status', 
                        'notes', 'created_at')
 
     def has_add_permission(self, request):
-        # Admin cannot create sessions directly
-        return False
+        return False  # 管理员不能新建
 
     def has_delete_permission(self, request, obj=None):
-        # Admin cannot delete sessions
-        return False
+        return False  # 管理员不能删除
