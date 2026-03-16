@@ -11,6 +11,18 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @staticmethod
+    def create_default_categories():
+        defaults = [
+            "Study",
+            "Programming",
+            "Revision",
+            "Reading"
+        ]
+
+        for name in defaults:
+            Category.objects.get_or_create(name=name)
 
     class Meta:
         verbose_name_plural = 'Categories'

@@ -1,8 +1,37 @@
 {% extends 'base.html' %}
 {% block title %}My Tasks — TrackIt{% endblock %}
 {% block page_title %}My Tasks{% endblock %}
+<style>
 
+.sticky-btn-delete{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:40px;
+  height:40px;
+
+  border:1px solid #fca5a5;
+  border-radius:8px;
+
+  color:#dc2626;
+  background:#fff;
+
+  text-decoration:none;
+}
+
+.sticky-btn-delete:hover{
+  background:#fee2e2;
+}
+
+</style>
 {% block content %}
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+  <a href="{% url 'task_create' %}" class="btn-orange">
+    + New Task
+  </a>
+</div>
 
 <!-- Global learning stats banner -->
 <div class="trackit-card mb-4" style="padding:16px 24px;">
@@ -160,7 +189,7 @@
         <a href="{% url 'task_delete' task.pk %}"
            class="sticky-btn-delete"
            onclick="return confirm('Delete \'{{ task.title }}\'?')">
-          <i class="fas fa-trash"></i>
+           <i class="fas fa-trash"></i>
         </a>
       </div>
     </div>

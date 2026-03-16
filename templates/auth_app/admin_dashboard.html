@@ -1,17 +1,334 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
-{% block breadcrumb %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard — TrackIt{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block breadcrumb %}Manage platform users and monitor system activity{% endblock %}
 
 {% block content %}
-<h2>Admin Dashboard</h2>
 
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
-  <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
-    <div class="muted">User List（搜索/编辑/禁用等，后续实现）</div>
+<!-- System Health -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:20px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Active Users Today</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--primary);">
+      {{ active_users }}
+    </div>
+    <div class="muted">Users who logged in today</div>
   </div>
 
-  <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
-    <div class="muted">System Statistics（总用户/今日 session/活动数等）</div>
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Tasks Created Today</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--orange);">
+      {{ tasks_today }}
+    </div>
+    <div class="muted">Tasks added today</div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Sessions Booked Today</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--success);">
+      {{ sessions_today }}
+    </div>
+    <div class="muted">Sessions created today</div>
+  </div>
+
+</div>
+
+<!-- Core System Stats -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px; margin-bottom:20px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Total Users</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--orange);">
+      {{ total_users }}
+    </div>
+    <div class="muted">Registered accounts in the system</div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Total Tasks</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--orange);">
+      {{ total_tasks }}
+    </div>
+    <div class="muted">All learning tasks created by users</div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Active Tasks</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--primary);">
+      {{ active_tasks }}
+    </div>
+    <div class="muted">Tasks currently in progress</div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Completed Tasks</h4>
+    <div style="font-size:32px; font-weight:800; color:var(--success);">
+      {{ completed_tasks }}
+    </div>
+    <div class="muted">Tasks marked as completed</div>
+  </div>
+
+</div>
+
+<!-- Task & Session Chart -->
+<div class="trackit-card" style="padding:20px; margin-bottom:20px;">
+  <h4>Task and Session Overview</h4>
+  <div class="muted" style="margin-bottom:18px;">
+    Visual comparison of task and session status distribution.
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    <div>
+      <h5 style="margin:0 0 14px 0;">Tasks</h5>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Total Tasks ({{ total_tasks }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:100%; height:100%; background:var(--orange);"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Active Tasks ({{ active_tasks }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:{% widthratio active_tasks total_tasks 100 %}%; height:100%; background:var(--primary);"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Completed Tasks ({{ completed_tasks }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:{% widthratio completed_tasks total_tasks 100 %}%; height:100%; background:var(--success); min-width:6px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h5 style="margin:0 0 14px 0;">Sessions</h5>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Total Sessions ({{ total_sessions }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:100%; height:100%; background:var(--orange);"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Pending Sessions ({{ pending_sessions }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:{% widthratio pending_sessions total_sessions 100 %}%; height:100%; background:#92400E;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">In Progress Sessions ({{ in_progress_sessions }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:{% widthratio in_progress_sessions total_sessions 100 %}%; height:100%; background:var(--primary);"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted" style="margin-bottom:6px;">Completed Sessions ({{ completed_sessions }})</div>
+        <div style="height:12px; background:#f3f4f6; border-radius:999px; overflow:hidden;">
+          <div style="width:{% widthratio completed_sessions total_sessions 100 %}%; height:100%; background:var(--success); min-width:6px;"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!-- Recent Tasks + Top Active Users -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Recent Tasks</h4>
+    <div class="muted" style="margin-bottom:16px;">
+      Latest tasks created in the platform.
+    </div>
+
+    <div style="max-height:220px; overflow-y:auto;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <th style="text-align:left; padding:10px 8px;">Task</th>
+            <th style="text-align:left; padding:10px 8px;">User</th>
+            <th style="text-align:left; padding:10px 8px;">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in recent_tasks %}
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:10px 8px;">{{ task.title }}</td>
+            <td style="padding:10px 8px;">{{ task.user.username }}</td>
+            <td style="padding:10px 8px;">{{ task.created_at|date:"Y-m-d" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="padding:12px 8px;" class="muted">No recent tasks found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Top Active Users</h4>
+    <div class="muted" style="margin-bottom:16px;">
+      Recently active users based on login activity.
+    </div>
+
+    <div style="max-height:220px; overflow-y:auto;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <th style="text-align:left; padding:10px 8px;">User</th>
+            <th style="text-align:left; padding:10px 8px;">Email</th>
+            <th style="text-align:left; padding:10px 8px;">Last Login</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in top_users %}
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:10px 8px;">{{ user.username }}</td>
+            <td style="padding:10px 8px;">{{ user.email|default:"No email" }}</td>
+            <td style="padding:10px 8px;">
+              {% if user.last_login %}
+                {{ user.last_login|date:"Y-m-d H:i" }}
+              {% else %}
+                Never
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="padding:12px 8px;" class="muted">No active users found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Session Overview + System Summary -->
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:24px; margin-top:12px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Session Overview</h4>
+    <div class="muted" style="margin-bottom:16px;">
+      Overview of all study sessions recorded in the platform.
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(3, minmax(160px, 1fr)); gap:14px;">
+      <div style="padding:14px; border:1px solid var(--gray-200); border-radius:12px;">
+        <div class="muted">Total Sessions</div>
+        <div style="font-size:24px; font-weight:800; color:var(--orange);">
+          {{ total_sessions }}
+        </div>
+      </div>
+
+      <div style="padding:14px; border:1px solid var(--gray-200); border-radius:12px;">
+        <div class="muted">Completed</div>
+        <div style="font-size:24px; font-weight:800; color:var(--success);">
+          {{ completed_sessions }}
+        </div>
+      </div>
+
+      <div style="padding:14px; border:1px solid var(--gray-200); border-radius:12px;">
+        <div class="muted">Pending</div>
+        <div style="font-size:24px; font-weight:800; color:#92400E;">
+          {{ pending_sessions }}
+        </div>
+      </div>
+
+      <div style="padding:14px; border:1px solid var(--gray-200); border-radius:12px;">
+        <div class="muted">In Progress</div>
+        <div style="font-size:24px; font-weight:800; color:var(--primary);">
+          {{ in_progress_sessions }}
+        </div>
+      </div>
+
+      <div style="padding:14px; border:1px solid var(--gray-200); border-radius:12px;">
+        <div class="muted">Cancelled</div>
+        <div style="font-size:24px; font-weight:800; color:var(--gray-600);">
+          {{ cancelled_sessions }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>System Summary</h4>
+    <div class="muted" style="margin-bottom:16px;">
+      Key platform indicators at a glance.
+    </div>
+
+    <ul style="margin:0; padding-left:18px; line-height:1.9; color:var(--gray-700);">
+      <li><strong>{{ total_users }}</strong> registered users</li>
+      <li><strong>{{ total_tasks }}</strong> total tasks</li>
+      <li><strong>{{ total_sessions }}</strong> total sessions</li>
+      <li><strong>{{ completed_tasks }}</strong> completed tasks</li>
+      <li><strong>{{ completed_sessions }}</strong> completed sessions</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- Recent Users + Recent Sessions -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:20px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Recent Users</h4>
+    <div class="muted" style="margin-bottom:14px;">
+      Latest registered accounts
+    </div>
+
+    {% if recent_users %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for user in recent_users %}
+          <div style="padding:12px 14px; border:1px solid var(--gray-200); border-radius:12px;">
+            <div style="font-weight:700;">{{ user.username }}</div>
+            <div class="muted">{{ user.email|default:"No email" }}</div>
+            <div class="muted">Joined: {{ user.date_joined|date:"Y-m-d" }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No users found.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>Recent Sessions</h4>
+    <div class="muted" style="margin-bottom:14px;">
+      Latest booked study sessions
+    </div>
+
+    {% if recent_sessions %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for session in recent_sessions %}
+          <div style="padding:12px 14px; border:1px solid var(--gray-200); border-radius:12px;">
+            <div style="font-weight:700;">{{ session.task.title }}</div>
+            <div class="muted">User: {{ session.user.username }}</div>
+            <div class="muted">Status: {{ session.get_status_display }}</div>
+            <div class="muted">Created: {{ session.created_at|date:"Y-m-d" }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No sessions found.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
 {% endblock %}

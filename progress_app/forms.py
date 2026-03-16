@@ -1,12 +1,12 @@
 from django import forms
-from .models import Progress
+from booking_app.models import Task
 
 
-class ProgressForm(forms.ModelForm):
+class ProgressTaskForm(forms.ModelForm):
     class Meta:
-        model = Progress
-        fields = ["title", "notes"]
+        model = Task
+        fields = ["title", "description"]
         widgets = {
-            "title": forms.TextInput(attrs={"style": "width:360px;"}),
-            "notes": forms.Textarea(attrs={"rows": 5, "style": "width:360px;"}),
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4}),
         }

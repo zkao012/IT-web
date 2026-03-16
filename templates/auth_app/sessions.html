@@ -1,15 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Session Booking & Progress{% endblock %}
-{% block breadcrumb %}Session Booking & Progress{% endblock %}
+{% block title %}Admin Dashboard — TrackIt{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block breadcrumb %}Manage platform users and view system overview{% endblock %}
 
 {% block content %}
-<h2>Session Booking & Progress</h2>
 
-<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:14px;">
-  <div class="muted">上半部分：Book Session 表单（成员 B/C 用 AJAX 做提交/刷新）</div>
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:18px;">
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>User Management</h4>
+    <div class="muted" style="margin-bottom:14px;">
+      Manage user accounts and monitor user activity.
+    </div>
+
+    <div class="empty-state" style="padding:28px 16px;">
+      <i class="fas fa-users"></i>
+      <p>User management tools will be available here.</p>
+    </div>
+  </div>
+
+  <div class="trackit-card" style="padding:20px;">
+    <h4>System Overview</h4>
+    <div class="muted" style="margin-bottom:14px;">
+      View key platform information, including users, sessions, and activities.
+    </div>
+
+    <div class="empty-state" style="padding:28px 16px;">
+      <i class="fas fa-chart-line"></i>
+      <p>System statistics will be displayed here.</p>
+    </div>
+  </div>
+
 </div>
 
-<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;">
-  <div class="muted">下半部分：Sessions 列表 + Completion% + Edit（成员 C 做进度动态更新）</div>
-</div>
 {% endblock %}

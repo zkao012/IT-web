@@ -1,17 +1,32 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Delete</title>
-</head>
-<body>
-  <h1>Delete Task</h1>
-  <p>Are you sure you want to delete: <b>{{ item.title }}</b> ?</p>
+{% extends "base.html" %}
+{% block title %}Delete Task — TrackIt{% endblock %}
+{% block page_title %}Delete Task{% endblock %}
+{% block breadcrumb %}Manage your progress tasks{% endblock %}
+
+{% block content %}
+
+<div class="form-card" style="max-width:640px;">
+  <h4>Delete Task</h4>
+
+  <div class="muted" style="margin-bottom:18px;">
+    Are you sure you want to delete this task?
+  </div>
+
+  <div class="trackit-card" style="padding:16px; margin-bottom:20px; background:#FEF2F2; border-color:#FECACA;">
+    <strong>{{ item.title }}</strong>
+  </div>
 
   <form method="post">
     {% csrf_token %}
-    <button type="submit">Yes, delete</button>
-    <a href="{% url 'progress_app:list' %}">Cancel</a>
+    <div style="display:flex; gap:10px;">
+      <button type="submit" class="btn-outline-danger-custom">
+        Yes, delete
+      </button>
+      <a href="{% url 'progress_app:list' %}" class="btn-gray">
+        Cancel
+      </a>
+    </div>
   </form>
-</body>
-</html>
+</div>
+
+{% endblock %}

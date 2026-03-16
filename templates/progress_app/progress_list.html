@@ -1,48 +1,126 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>My Progress</title>
-</head>
-<body>
-  <h1>My Progress</h1>
+{% extends "base.html" %}
 
-  <p>
-    Logged in as <b>{{ request.user.username }}</b>
-  </p>
+{% block title %}My Progress — TrackIt{% endblock %}
+{% block page_title %}My Progress{% endblock %}
+{% block breadcrumb %}Track task completion and learning progress{% endblock %}
 
-  <p>
-    <a href="{% url 'progress_app:add' %}">+ Add new task</a>
-  </p>
+{% block content %}
 
-  <h2>Pending Tasks</h2>
-  <ul>
+<!-- Pending Tasks -->
+<div class="trackit-card mb-4" style="padding:20px;">
+  <h4>Pending Tasks</h4>
+
+  {% if pending %}
     {% for item in pending %}
-      <li>
-        <b>{{ item.title }}</b>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:16px 0; border-bottom:1px solid var(--gray-100);">
 
-        <form action="{% url 'progress_app:done' item.pk %}" method="post" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit">✓ Done</button>
-        </form>
+        <div style="flex:1;">
+          <strong style="display:block; font-size:16px; margin-bottom:6px;">
+            {{ item.title }}
+          </strong>
 
-        | <a href="{% url 'progress_app:edit' item.pk %}">Edit</a>
-        | <a href="{% url 'progress_app:delete' item.pk %}">Delete</a>
-      </li>
-    {% empty %}
-      <li>No pending tasks.</li>
+          {% if item.description %}
+            <div class="muted" style="line-height:1.5; margin-bottom:10px;">
+              {{ item.description }}
+            </div>
+          {% endif %}
+
+          <!-- Progress bar -->
+          <div style="max-width:420px; margin-bottom:10px;">
+            <div class="sticky-progress-bar">
+              <div class="sticky-progress-fill" style="width:{{ item.progress_percent }}%;"></div>
+            </div>
+            <div class="sticky-progress-label">
+              {{ item.progress_percent }}% · {{ item.total_actual_minutes }}/{{ item.target_minutes }} min
+            </div>
+          </div>
+
+          <!-- Extra progress info -->
+          <div style="display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--gray-500);">
+            <span>⏱ Actual: {{ item.total_actual_minutes }} min</span>
+            <span>🎯 Target: {{ item.target_minutes }} min</span>
+            <span>⭐ Avg Quality: {{ item.average_quality }}%</span>
+            <span>🔥 Streak: {{ item.recent_streak }} day{{ item.recent_streak|pluralize }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <form action="{% url 'progress_app:done' item.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-orange">
+              ✓ Done
+            </button>
+          </form>
+
+          <a href="{% url 'progress_app:edit' item.pk %}" class="btn-outline-primary-custom">
+            Edit
+          </a>
+
+          <a href="{% url 'progress_app:delete' item.pk %}" class="btn-outline-danger-custom">
+            Delete
+          </a>
+        </div>
+
+      </div>
     {% endfor %}
-  </ul>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-list-check"></i>
+      <p>No pending tasks.</p>
+    </div>
+  {% endif %}
+</div>
 
-  <h2>Completed Tasks</h2>
-  <ul>
+<!-- Completed Tasks -->
+<div class="trackit-card" style="padding:20px;">
+  <h4>Completed Tasks</h4>
+
+  {% if done %}
     {% for item in done %}
-      <li>
-        <b>{{ item.title }}</b> ✔ Completed
-      </li>
-    {% empty %}
-      <li>No completed tasks yet.</li>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:16px 0; border-bottom:1px solid var(--gray-100);">
+
+        <div style="flex:1;">
+          <strong style="display:block; font-size:16px; margin-bottom:6px; color:var(--success);">
+            ✔ {{ item.title }}
+          </strong>
+
+          {% if item.description %}
+            <div class="muted" style="line-height:1.5; margin-bottom:10px;">
+              {{ item.description }}
+            </div>
+          {% endif %}
+
+          <div style="max-width:420px; margin-bottom:10px;">
+            <div class="sticky-progress-bar">
+              <div class="sticky-progress-fill" style="width:100%; background:var(--success);"></div>
+            </div>
+            <div class="sticky-progress-label">
+              Completed · {{ item.total_actual_minutes }}/{{ item.target_minutes }} min
+            </div>
+          </div>
+
+          <div style="display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:var(--gray-500);">
+            <span>⏱ Actual: {{ item.total_actual_minutes }} min</span>
+            <span>🎯 Target: {{ item.target_minutes }} min</span>
+            <span>⭐ Avg Quality: {{ item.average_quality }}%</span>
+            <span>🔥 Streak: {{ item.recent_streak }} day{{ item.recent_streak|pluralize }}</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a href="{% url 'progress_app:delete' item.pk %}" class="btn-outline-danger-custom">
+            Delete
+          </a>
+        </div>
+
+      </div>
     {% endfor %}
-  </ul>
-</body>
-</html>
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-check-circle"></i>
+      <p>No completed tasks yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -3,15 +3,21 @@
 
 {% block head %}
 <style>
-  /* 整页布局 */
+  /* Hide dashboard layout spacing on login page */
+  .page{
+    padding:0 !important;
+  }
+  .page-inner{
+    max-width:none !important;
+  }
+
   .login-page{
-    min-height:100vh;
+    min-height:calc(100vh - 56px);
     background:#ffffff;
     display:flex;
     flex-direction:column;
   }
 
-  /* 顶部灰条 */
   .login-topbar{
     height:56px;
     background:#f3f4f6;
@@ -22,21 +28,19 @@
     font-weight:600;
   }
 
-  /* 居中区域 */
   .login-main{
     flex:1;
     display:flex;
     align-items:center;
-    justify-content:center;   /* ✅ 强制水平居中 */
+    justify-content:center;
     padding:24px;
   }
 
-  /* 让标题+卡片作为整体居中 */
   .login-panel{
     width:520px;
     display:flex;
     flex-direction:column;
-    align-items:center;       /* ✅ 标题也居中 */
+    align-items:center;
   }
 
   .login-title{
@@ -44,19 +48,21 @@
     font-weight:800;
     margin:0 0 18px 0;
     letter-spacing:.2px;
+    color:#111827;
   }
 
-  /* 卡片更像 wireframe：细边框 + 轻阴影 */
   .login-card{
-    width:420px;                     /* ✅ 稍微大一点更像图 */
+    width:420px;
     background:#fff;
     border:1px solid #d1d5db;
-    border-radius:10px;
+    border-radius:12px;
     padding:22px 24px;
-    box-shadow:0 2px 6px rgba(0,0,0,.06);
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
   }
 
-  .field{ margin-bottom:14px; }
+  .field{
+    margin-bottom:14px;
+  }
 
   .label{
     display:block;
@@ -66,9 +72,8 @@
     margin-bottom:6px;
   }
 
-  /* 输入框更扁平 */
   .input{
-    width:90%;
+    width:100%;
     height:44px;
     border:1px solid #d1d5db;
     border-radius:8px;
@@ -77,25 +82,41 @@
     background:#fff;
     outline:none;
   }
+
   .input:focus{
     border-color:#9ca3af;
     box-shadow:0 0 0 3px rgba(156,163,175,.25);
   }
 
-  /* 按钮更贴近 wireframe：宽、扁、灰 */
   .btn{
-    width:100%;
-    height:46px;
-    border:none;
-    border-radius:8px;
-    background:#6b7280;
-    color:#fff;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-    margin-top:10px;
-  }
-  .btn:hover{ background:#4b5563; }
+  width:100%;
+  height:46px;
+  border:none;
+  border-radius:8px;
+  background:#f97316;
+  color:#fff;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.btn:hover{
+  background:#ea580c;
+}
+
+.register-link{
+  display:block;
+  text-align:center;
+  margin-top:12px;
+  font-size:14px;
+  color:#6b7280;
+  text-decoration:none;
+  font-weight:600;
+}
+
+.register-link:hover{
+  color:#f97316;
+}
 
   .error{
     color:#dc2626;
@@ -129,11 +150,10 @@
           </div>
 
           <button class="btn" type="submit">Login</button>
-          <div style="margin-top:12px; text-align:center;">
-            <a href="{% url 'register' %}">Register</a>
-            &nbsp;|&nbsp;
-            <a href="{% url 'password_reset' %}">Forgot password</a>
-          </div>
+
+          <a class="register-link" href="{% url 'register' %}">
+            Create an account
+          </a>
 
           <div id="clientError" class="error" style="display:none;"></div>
           {% if error %}
@@ -153,7 +173,7 @@ document.getElementById("loginForm").addEventListener("submit", function(e){
   if(!u || !p){
     e.preventDefault();
     err.style.display = "block";
-    err.textContent = "Email 和 Password 不能为空";
+    err.textContent = "Username and Password are required.";
   }
 });
 </script>
