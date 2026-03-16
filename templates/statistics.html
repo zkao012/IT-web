@@ -50,7 +50,7 @@
 </div>
 
 <!-- Charts row -->
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+<div class="charts-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
 
   <!-- Weekly minutes bar chart -->
   <div class="trackit-card" style="padding:24px;">
@@ -182,6 +182,12 @@
   {% endif %}
 </div>
 
+{% block head_extra %}
+<style>
+@media (max-width: 768px) {
+  .charts-grid { grid-template-columns: 1fr !important; }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}

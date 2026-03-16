@@ -5,53 +5,55 @@
 {% block content %}
 
 <!-- Stats banner -->
-<div class="trackit-card mb-4" style="padding:20px 28px;">
-  <div style="display:flex; gap:0; align-items:stretch; flex-wrap:wrap;">
+<div class="trackit-card mb-4" style="padding:20px 24px;">
+  <div class="stats-banner-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0;">
 
-    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px 8px 0;">
-      <span style="font-size:28px;">🔥</span>
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 16px 8px 0; border-right:1px solid var(--gray-200);">
+      <span style="font-size:24px;">🔥</span>
       <div>
-        <div style="font-size:28px; font-weight:800; color:var(--orange); line-height:1;">{{ streak }}</div>
-        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Day Streak</div>
+        <div style="font-size:24px; font-weight:800; color:var(--orange); line-height:1;">{{ streak }}</div>
+        <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">Day Streak</div>
       </div>
     </div>
 
-    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
-
-    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px;">
-      <span style="font-size:24px;">📅</span>
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 16px; border-right:1px solid var(--gray-200);">
+      <span style="font-size:22px;">📅</span>
       <div>
-        <div style="font-size:28px; font-weight:800; color:var(--gray-800); line-height:1;">
-          {{ week_minutes }}<span style="font-size:14px; color:var(--gray-400); font-weight:600;"> min</span>
+        <div style="font-size:22px; font-weight:800; color:var(--gray-800); line-height:1;">
+          {{ week_minutes }}<span style="font-size:12px; color:var(--gray-400); font-weight:600;"> min</span>
         </div>
-        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">This Week</div>
+        <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">This Week</div>
       </div>
     </div>
 
-    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
-
-    <div style="display:flex; align-items:center; gap:12px; padding:8px 36px;">
-      <span style="font-size:24px;">⚡</span>
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 16px; border-right:1px solid var(--gray-200);">
+      <span style="font-size:22px;">⚡</span>
       <div>
-        <div style="font-size:28px; font-weight:800; color:var(--gray-800); line-height:1;">
-          {{ today_minutes }}<span style="font-size:14px; color:var(--gray-400); font-weight:600;"> min</span>
+        <div style="font-size:22px; font-weight:800; color:var(--gray-800); line-height:1;">
+          {{ today_minutes }}<span style="font-size:12px; color:var(--gray-400); font-weight:600;"> min</span>
         </div>
-        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Today</div>
+        <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">Today</div>
       </div>
     </div>
 
-    <div style="width:1px; background:var(--gray-200); margin:4px 0;"></div>
-
-    <div style="display:flex; align-items:center; gap:12px; padding:8px 0 8px 36px;">
-      <span style="font-size:24px;">✅</span>
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 0 8px 16px;">
+      <span style="font-size:22px;">✅</span>
       <div>
-        <div style="font-size:28px; font-weight:800; color:#10B981; line-height:1;">{{ completed_count }}</div>
-        <div style="font-size:12px; color:var(--gray-400); margin-top:3px;">Tasks Done</div>
+        <div style="font-size:22px; font-weight:800; color:#10B981; line-height:1;">{{ completed_count }}</div>
+        <div style="font-size:11px; color:var(--gray-400); margin-top:2px;">Tasks Done</div>
       </div>
     </div>
 
   </div>
 </div>
+
+<style>
+@media (max-width: 600px) {
+  .stats-banner-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+</style>
 
 {% if motivation %}
 <div class="motivation-banner">
