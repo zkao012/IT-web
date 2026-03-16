@@ -1,15 +1,24 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-trackit-dev-key-change-in-production'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-trackit-dev-key-change-in-production')
 
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'jieqi.pythonanywhere.com',
+    '.onrender.com',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://it-web.onrender.com',
+]
 
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -50,12 +60,8 @@ WSGI_APPLICATION = 'trackit.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'trackit_db',
-        'USER': 'root',
-        'PASSWORD': '111111',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -73,68 +79,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'  
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/admin/login/'
-
-JAZZMIN_SETTINGS = {
-    "site_title": "TrackIt Admin",
-    "site_header": "TrackIt",
-    "site_brand": "TrackIt",
-    "welcome_sign": "Welcome to TrackIt",
-    "copyright": "TrackIt",
-    "custom_css": "css/admin_custom.css",
-    "custom_js": None,
-    "use_google_fonts_cdn": True,
-    "show_ui_builder": False,
-    "icons": {
-        "auth": "fas fa-shield-alt",
-        "auth.Group": "fas fa-users-cog",
-        "auth.User": "fas fa-user",
-        "core": "fas fa-layer-group",
-        "core.Category": "fas fa-tag",
-        "core.Task": "fas fa-tasks",
-        "core.Session": "fas fa-calendar-alt",
-    },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    "order_with_respect_to": [
-        "auth",
-        "core",
-        "core.Category",
-        "core.Task",
-        "core.Session",
-    ],
-}
-
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": False,
-    "accent": "accent-orange",
-    "navbar": "navbar-orange navbar-dark",
-    "no_navbar_border": True,
-    "sidebar": "sidebar-light-orange",
-    "sidebar_nav_small_text": False,
-    "sidebar_nav_flat_style": True,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_compact_style": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "navbar_fixed": False,
-    "sidebar_fixed": False,
-    "theme": "default",
-    "button_classes": {
-        "primary": "btn-warning",
-        "secondary": "btn-outline-secondary",
-        "info": "btn-warning",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-warning",
-    },
-}
+LOGIN_URL = '/login/'
