@@ -16,7 +16,6 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('username', 'email')
     ordering = ('-date_joined',)
     
-    # 只保留必要字段，去掉多余 tab
     fieldsets = (
         ('Account', {'fields': ('username', 'email', 'password')}),
         ('Status', {'fields': ('is_active', 'is_staff')}),
@@ -63,10 +62,10 @@ class TaskAdmin(admin.ModelAdmin):
                        'target_minutes', 'is_active', 'created_at')
 
     def has_add_permission(self, request):
-        return False  # 管理员不能新建
+        return False  
 
     def has_delete_permission(self, request, obj=None):
-        return False  # 管理员不能删除
+        return False  
 
 
 @admin.register(Session)
@@ -79,7 +78,7 @@ class SessionAdmin(admin.ModelAdmin):
                        'notes', 'created_at')
 
     def has_add_permission(self, request):
-        return False  # 管理员不能新建
+        return False  
 
     def has_delete_permission(self, request, obj=None):
-        return False  # 管理员不能删除
+        return False  

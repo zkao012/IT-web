@@ -4,3 +4,7 @@ mysqlclient==2.2.8
 pillow==12.1.1
 sqlparse==0.5.5
 tzdata==2025.3
+whitenoise==6.7.0
+gunicorn==21.2.0
+dj-database-url==2.1.0
+psycopg[binary]==3.2.13

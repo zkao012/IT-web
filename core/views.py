@@ -10,26 +10,285 @@ import json
 
 from .models import Session, Task, Category
 from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+
+# ========== Auth Views ==========
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('task_list')
+
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        next_url = request.POST.get('next', '')
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            if next_url:
+                return redirect(next_url)
+            if user.is_staff:
+                return redirect('admin_dashboard')
+            return redirect('dashboard')
+        else:
+            error = 'Invalid username or password.'
+
+    return render(request, 'auth/login.html', {'error': error})
 
 
-# ========== Task Views ==========
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('task_list')
+
+    error = None
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        username = request.POST.get('username', '').strip()
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
+
+        if not email or not username or not password1 or not password2:
+            error = 'Please fill in all fields.'
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                error = 'Please enter a valid email address.'
+
+        if error is None and password1 != password2:
+            error = 'Passwords do not match.'
+
+        if error is None and User.objects.filter(username=username).exists():
+            error = 'Username already exists.'
+
+        if error is None and User.objects.filter(email=email).exists():
+            error = 'Email already exists.'
+
+        if error is None:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1
+            )
+            from django.contrib.auth import login as auth_login
+            auth_login(request, user)
+            return redirect('dashboard')
+
+    return render(request, 'auth/register.html', {'error': error})
+
+# ========== Admin Views ===========
+
+@staff_member_required(login_url='login')
+def admin_dashboard(request):
+    from django.db.models import Sum, Avg
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+    week_start = today_start - timezone.timedelta(days=today_start.weekday())
+
+    # Platform stats
+    total_users = User.objects.filter(is_staff=False).count()
+    active_users_today = User.objects.filter(
+        is_staff=False, last_login__gte=today_start, last_login__lte=today_end
+    ).count()
+    new_users_today = User.objects.filter(
+        is_staff=False, date_joined__gte=today_start
+    ).count()
+    disabled_users = User.objects.filter(is_staff=False, is_active=False).count()
+
+    total_tasks = Task.objects.count()
+    tasks_today = Task.objects.filter(created_at__gte=today_start).count()
+    completed_tasks = Task.objects.filter(is_active=True).count()
+
+    total_sessions = Session.objects.count()
+    sessions_today = Session.objects.filter(created_at__gte=today_start).count()
+    completed_sessions = Session.objects.filter(status='completed').count()
+    pending_sessions = Session.objects.filter(status='pending').count()
+    in_progress_sessions = Session.objects.filter(status='in_progress').count()
+    cancelled_sessions = Session.objects.filter(status='cancelled').count()
+
+    # Weekly activity - sessions per day
+    weekly_labels = []
+    weekly_data = []
+    for i in range(6, -1, -1):
+        day_start = today_start - timezone.timedelta(days=i)
+        day_end = today_start - timezone.timedelta(days=i-1)
+        count = Session.objects.filter(
+            created_at__gte=day_start, created_at__lt=day_end
+        ).count()
+        weekly_labels.append(day_start.strftime('%a'))
+        weekly_data.append(count)
+
+    # Recent activity
+    recent_users = User.objects.filter(is_staff=False).order_by('-date_joined')[:5]
+    recent_sessions = Session.objects.select_related('user', 'task').order_by('-created_at')[:5]
+
+    import json as _json
+    return render(request, 'auth/admin_dashboard.html', {
+        'total_users': total_users,
+        'active_users_today': active_users_today,
+        'new_users_today': new_users_today,
+        'disabled_users': disabled_users,
+        'total_tasks': total_tasks,
+        'tasks_today': tasks_today,
+        'completed_tasks': completed_tasks,
+        'total_sessions': total_sessions,
+        'sessions_today': sessions_today,
+        'completed_sessions': completed_sessions,
+        'pending_sessions': pending_sessions,
+        'in_progress_sessions': in_progress_sessions,
+        'cancelled_sessions': cancelled_sessions,
+        'weekly_labels': _json.dumps(weekly_labels),
+        'weekly_data': _json.dumps(weekly_data),
+        'recent_users': recent_users,
+        'recent_sessions': recent_sessions,
+    })
+
+
+@staff_member_required(login_url='login')
+def admin_user_list(request):
+    users = User.objects.filter(is_staff=False).order_by('-date_joined')
+    return render(request, 'auth/admin_user_list.html', {'users': users})
+
+
+@staff_member_required(login_url='login')
+def admin_user_detail(request, pk):
+    profile_user = get_object_or_404(User, pk=pk, is_staff=False)
+    tasks = Task.objects.filter(user=profile_user).order_by('-created_at')
+    sessions = Session.objects.filter(user=profile_user).order_by('-planned_start')[:10]
+    return render(request, 'auth/admin_user_detail.html', {
+        'profile_user': profile_user,
+        'tasks': tasks,
+        'sessions': sessions,
+    })
+
+
+@staff_member_required(login_url='login')
+def admin_user_toggle(request, pk):
+    user = get_object_or_404(User, pk=pk, is_staff=False)
+    if request.method == 'POST':
+        user.is_active = not user.is_active
+        user.save()
+        status = 'enabled' if user.is_active else 'disabled'
+        messages.success(request, f'Account "{user.username}" {status}.')
+    return redirect('admin_user_list')
+
+
+@staff_member_required(login_url='login')
+def admin_category_list(request):
+    categories = Category.objects.annotate(
+        task_count=models.Count('task')
+    ).order_by('name')
+    return render(request, 'auth/admin_category_list.html', {'categories': categories})
+
+
+@staff_member_required(login_url='login')
+def admin_category_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name:
+            messages.error(request, 'Category name is required.')
+        elif Category.objects.filter(name__iexact=name).exists():
+            messages.error(request, f'Category "{name}" already exists.')
+        else:
+            Category.objects.create(name=name, description=description)
+            messages.success(request, f'Category "{name}" created.')
+            return redirect('admin_category_list')
+    return render(request, 'auth/admin_category_form.html', {'mode': 'create'})
+
+
+@staff_member_required(login_url='login')
+def admin_category_edit(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name:
+            messages.error(request, 'Category name is required.')
+        elif Category.objects.filter(name__iexact=name).exclude(pk=pk).exists():
+            messages.error(request, f'Category "{name}" already exists.')
+        else:
+            category.name = name
+            category.description = description
+            category.save()
+            messages.success(request, f'Category updated.')
+            return redirect('admin_category_list')
+    return render(request, 'auth/admin_category_form.html', {
+        'mode': 'edit', 'category': category
+    })
+
+
+@staff_member_required(login_url='login')
+def admin_category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        task_count = Task.objects.filter(category=category).count()
+        if task_count > 0:
+            messages.error(request, f'Cannot delete "{category.name}" — {task_count} task(s) are using it. Reassign them first.')
+        else:
+            category.delete()
+            messages.success(request, f'Category "{category.name}" deleted.')
+    return redirect('admin_category_list')
+
+
+@staff_member_required(login_url='login')
+def admin_task_list(request):
+    user_filter = request.GET.get('user', '')
+    category_filter = request.GET.get('category', '')
+    tasks = Task.objects.select_related('user', 'category').order_by('-created_at')
+    if user_filter:
+        tasks = tasks.filter(user__username__icontains=user_filter)
+    if category_filter:
+        tasks = tasks.filter(category__id=category_filter)
+    categories = Category.objects.all()
+    paginator = Paginator(tasks, 15)
+    page = request.GET.get('page', 1)
+    tasks_page = paginator.get_page(page)
+    return render(request, 'auth/admin_task_list.html', {
+        'tasks': tasks_page,
+        'categories': categories,
+        'user_filter': user_filter,
+        'category_filter': category_filter,
+    })
+
+
+@staff_member_required(login_url='login')
+def admin_session_list(request):
+    status_filter = request.GET.get('status', '')
+    user_filter = request.GET.get('user', '')
+    sessions = Session.objects.select_related('user', 'task').order_by('-planned_start')
+    if status_filter:
+        sessions = sessions.filter(status=status_filter)
+    if user_filter:
+        sessions = sessions.filter(user__username__icontains=user_filter)
+    paginator = Paginator(sessions, 15)
+    page = request.GET.get('page', 1)
+    sessions_page = paginator.get_page(page)
+    return render(request, 'auth/admin_session_list.html', {
+        'sessions': sessions_page,
+        'status_filter': status_filter,
+        'user_filter': user_filter,
+    })
+
+
+# ========== Dashboard View ==========
 
 @login_required
-def task_list(request):
-    active_tasks = Task.objects.filter(user=request.user, is_active=True)
-    in_progress = [t for t in active_tasks if t.progress_percent() < 100]
-    completed = [t for t in active_tasks if t.progress_percent() >= 100]
-
-    paginator = Paginator(in_progress, 8)
-    page = request.GET.get('page', 1)
-    in_progress_page = paginator.get_page(page)
-
-    # 用范围查询避免 MySQL __date 过滤问题
+def dashboard(request):
     now = timezone.now()
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # 全局连续学习 streak（最多往前查30天）
+    # Learning streak (up to 30 days)
     streak = 0
     for i in range(30):
         day_start = today_start - timezone.timedelta(days=i)
@@ -44,7 +303,6 @@ def task_list(request):
         else:
             break
 
-    # 本周已学时长
     week_start = today_start - timezone.timedelta(days=today_start.weekday())
     week_minutes = Session.objects.filter(
         user=request.user,
@@ -54,7 +312,186 @@ def task_list(request):
         total=Sum('actual_minutes')
     )['total'] or 0
 
-    # 今日已学时长
+    today_minutes = Session.objects.filter(
+        user=request.user,
+        planned_start__gte=today_start,
+        planned_start__lte=today_end,
+    ).exclude(status__in=['cancelled', 'pending']).aggregate(
+        total=Sum('actual_minutes')
+    )['total'] or 0
+
+    all_active = Task.objects.filter(user=request.user, is_active=True)
+    active_tasks = [t for t in all_active if not t.is_completed()][:5]
+    completed_count = len([t for t in all_active if t.is_completed()])
+
+    recent_sessions = Session.objects.filter(
+        user=request.user
+    ).select_related('task').order_by('-planned_start')[:5]
+
+    # Motivational message based on streak
+    if streak == 0:
+        motivation = "Start your first session today! 🌱"
+    elif streak <= 3:
+        motivation = "Great start! Keep the momentum going 🔥"
+    elif streak <= 6:
+        motivation = "You're on a roll! Don't break the chain 💪"
+    elif streak <= 13:
+        motivation = f"{streak} days strong! You're building a great habit 🚀"
+    else:
+        motivation = f"Incredible {streak}-day streak! You're unstoppable ⚡"
+
+    return render(request, 'dashboard.html', {
+        'streak': streak,
+        'week_minutes': week_minutes,
+        'today_minutes': today_minutes,
+        'active_tasks': active_tasks,
+        'completed_count': completed_count,
+        'recent_sessions': recent_sessions,
+        'motivation': motivation,
+    })
+
+
+# ========== Statistics View ==========
+
+@login_required
+def statistics(request):
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    # All completed/in-progress sessions for this user
+    valid_sessions = Session.objects.filter(
+        user=request.user
+    ).exclude(status__in=['cancelled', 'pending'])
+
+    # Summary numbers
+    total_minutes = valid_sessions.aggregate(t=Sum('actual_minutes'))['t'] or 0
+    total_sessions = Session.objects.filter(user=request.user).count()
+    completed_sessions = Session.objects.filter(user=request.user, status='completed').count()
+    avg_quality = valid_sessions.exclude(completion_percent=0).aggregate(
+        a=Sum('completion_percent')
+    )['a'] or 0
+    quality_count = valid_sessions.exclude(completion_percent=0).count()
+    avg_quality = round(avg_quality / quality_count) if quality_count else 0
+
+    # Last 7 days — minutes per day
+    weekly_labels = []
+    weekly_data = []
+    for i in range(6, -1, -1):
+        day_start = today_start - timezone.timedelta(days=i)
+        day_end = today_end - timezone.timedelta(days=i)
+        mins = valid_sessions.filter(
+            planned_start__gte=day_start,
+            planned_start__lte=day_end,
+        ).aggregate(t=Sum('actual_minutes'))['t'] or 0
+        weekly_labels.append(day_start.strftime('%a'))
+        weekly_data.append(mins)
+
+    # Minutes by category
+    category_labels = []
+    category_data = []
+    for cat in Category.objects.all():
+        mins = valid_sessions.filter(task__category=cat).aggregate(
+            t=Sum('actual_minutes')
+        )['t'] or 0
+        if mins > 0:
+            category_labels.append(cat.name)
+            category_data.append(mins)
+    # Uncategorised
+    uncategorised = valid_sessions.filter(task__category__isnull=True).aggregate(
+        t=Sum('actual_minutes')
+    )['t'] or 0
+    if uncategorised > 0:
+        category_labels.append('Uncategorised')
+        category_data.append(uncategorised)
+
+    # Per-task stats
+    tasks = Task.objects.filter(user=request.user, is_active=True)
+    task_stats = []
+    for t in tasks:
+        task_stats.append({
+            'title': t.title,
+            'category': t.category,
+            'pct': t.progress_percent(),
+            'actual': t.total_actual_minutes(),
+            'target': t.target_minutes,
+            'extra': t.extra_minutes(),
+            'avg_quality': t.average_quality(),
+            'streak': t.recent_streak(),
+        })
+    task_stats.sort(key=lambda x: x['pct'], reverse=True)
+
+    # Recent 10 sessions for the table
+    recent_sessions = Session.objects.filter(
+        user=request.user
+    ).select_related('task').order_by('-planned_start')[:10]
+
+    import json as _json
+    return render(request, 'statistics.html', {
+        'total_minutes': total_minutes,
+        'total_sessions': total_sessions,
+        'completed_sessions': completed_sessions,
+        'avg_quality': avg_quality,
+        'weekly_labels': _json.dumps(weekly_labels),
+        'weekly_data': _json.dumps(weekly_data),
+        'category_labels': _json.dumps(category_labels),
+        'category_data': _json.dumps(category_data),
+        'task_stats': task_stats,
+        'recent_sessions': recent_sessions,
+    })
+
+
+# ========== Progress View ==========
+
+@login_required
+def progress_list(request):
+    tasks = Task.objects.filter(user=request.user, is_active=True).order_by('-created_at')
+    pending = [t for t in tasks if not t.is_completed()]
+    done = [t for t in tasks if t.is_completed()]
+    return render(request, 'progress/progress_list.html', {
+        'pending': pending,
+        'done': done,
+    })
+
+# ========== Task Views ==========
+
+@login_required
+def task_list(request):
+    active_tasks = Task.objects.filter(user=request.user, is_active=True)
+    in_progress = [t for t in active_tasks if t.progress_percent() < 100]
+    completed = [t for t in active_tasks if t.progress_percent() >= 100]
+
+    paginator = Paginator(in_progress, 8)
+    page = request.GET.get('page', 1)
+    in_progress_page = paginator.get_page(page)
+
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    streak = 0
+    for i in range(30):
+        day_start = today_start - timezone.timedelta(days=i)
+        day_end = today_end - timezone.timedelta(days=i)
+        has_session = Session.objects.filter(
+            user=request.user,
+            planned_start__gte=day_start,
+            planned_start__lte=day_end,
+        ).exclude(status__in=['cancelled', 'pending']).exists()
+        if has_session:
+            streak += 1
+        else:
+            break
+
+    week_start = today_start - timezone.timedelta(days=today_start.weekday())
+    week_minutes = Session.objects.filter(
+        user=request.user,
+        planned_start__gte=week_start,
+        planned_start__lte=today_end,
+    ).exclude(status__in=['cancelled', 'pending']).aggregate(
+        total=Sum('actual_minutes')
+    )['total'] or 0
+
     today_minutes = Session.objects.filter(
         user=request.user,
         planned_start__gte=today_start,
@@ -90,7 +527,6 @@ def task_create(request):
 @login_required
 def task_delete(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
-    # 删除 task 时所有关联 session 一起删
     task.sessions.all().delete()
     task.is_active = False
     task.save()
@@ -188,7 +624,6 @@ def session_update_progress(request, pk):
         if actual_minutes < 0:
             return JsonResponse({'error': 'actual_minutes cannot be negative.'}, status=400)
 
-        # 实际时长上限：计划时长的3倍
         max_minutes = session.planned_minutes() * 3
         if actual_minutes > max_minutes:
             return JsonResponse({'error': f'Time seems too high. Max allowed: {max_minutes} min (3x planned).'}, status=400)
@@ -200,7 +635,6 @@ def session_update_progress(request, pk):
         session.completion_percent = completion_percent
         session.notes = notes
 
-        # 普通保存 → in_progress，点 Mark as Complete → completed
         if mark_complete:
             session.status = 'completed'
         else:
@@ -271,7 +705,6 @@ def session_reschedule(request, pk):
         if is_naive(new_end):
             new_end = make_aware(new_end)
 
-        # 冲突检测
         conflicts = Session.objects.filter(
             user=request.user,
             planned_start__lt=new_end,
