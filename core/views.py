@@ -12,6 +12,7 @@ from .models import Session, Task, Category
 from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.contrib.admin.views.decorators import staff_member_requireds
 
 # ========== Auth Views ==========
 
