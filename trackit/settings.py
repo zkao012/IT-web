@@ -59,12 +59,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'trackit.wsgi.application'
 
-DATABASE_URL = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://trackit_db_66xr_user:dD9YmMAIxoxCrQuyShpNii3dvpvZRljC@dpg-d6sqd0vpm1nc73bhtneg-a/trackit_db_66xr'
-)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_URL.startswith('postgresql'):
+if DATABASE_URL and not DEBUG:
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }

@@ -15,7 +15,8 @@ import json
 
 from .models import Session, Task, Category
 from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
-
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 # ========== Auth Views ==========
 
@@ -61,20 +62,32 @@ def register_view(request):
 
         if not email or not username or not password1 or not password2:
             error = 'Please fill in all fields.'
-        elif password1 != password2:
-            error = 'Passwords do not match.'
         else:
             try:
-                user = User.objects.create_user(username=username, email=email, password=password1)
-                # Auto-login after registration
-                from django.contrib.auth import login as auth_login
-                auth_login(request, user)
-                return redirect('dashboard')
-            except IntegrityError:
-                error = 'Username already exists.'
+                validate_email(email)
+            except ValidationError:
+                error = 'Please enter a valid email address.'
+
+        if error is None and password1 != password2:
+            error = 'Passwords do not match.'
+
+        if error is None and User.objects.filter(username=username).exists():
+            error = 'Username already exists.'
+
+        if error is None and User.objects.filter(email=email).exists():
+            error = 'Email already exists.'
+
+        if error is None:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1
+            )
+            from django.contrib.auth import login as auth_login
+            auth_login(request, user)
+            return redirect('dashboard')
 
     return render(request, 'auth/register.html', {'error': error})
-
 
 # ========== Admin Dashboard ==========
 
