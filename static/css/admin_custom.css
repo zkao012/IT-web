@@ -1,18 +1,17 @@
-/* ===== TrackIt Admin — custom orange theme ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 body, * {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* Brand area — deep orange background */
+/* 品牌区深橙色（Jazzmin accent-orange 略浅） */
 body .main-header .brand-link,
 body .main-sidebar .brand-link {
   background-color: #E55A1F;
   font-weight: 800;
 }
 
-/* Card border radius */
+/* 卡片圆角 */
 body .card {
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
@@ -22,7 +21,7 @@ body .card-header {
   border-radius: 14px 14px 0 0;
 }
 
-/* Table header — orange accent */
+/* 表格表头橙色 */
 #result_list thead th {
   background-color: #FFF4EF;
   color: #FF6B2C;
@@ -33,12 +32,11 @@ body .card-header {
   border-bottom: 2px solid #FF6B2C;
 }
 
-/* Table row hover */
 #result_list tbody tr:hover td {
   background-color: #FFF4EF;
 }
 
-/* Form input border radius */
+/* 输入框圆角 */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -50,7 +48,7 @@ textarea,
   font-size: 14px;
 }
 
-/* Success and error flash messages */
+/* 消息提示 */
 .messagelist .success {
   background: #ECFDF5;
   color: #065F46;
