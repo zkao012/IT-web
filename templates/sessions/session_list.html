@@ -102,12 +102,13 @@
     </div>
 
     <!-- Progress bar -->
-    <div style="height:6px; background:var(--gray-100); border-radius:999px; overflow:hidden; margin-bottom:6px;">
+    <div style="height:6px; background:var(--gray-100); border-radius:999px; overflow:hidden; margin-bottom:6px;" role="progressbar" aria-valuenow="{{ session.completion_percent }}" aria-valuemin="0" aria-valuemax="100" aria-label="Session progress: {{ session.completion_percent }}%">
       <div style="height:100%; width:{{ session.completion_percent }}%; background:var(--orange); border-radius:999px;"
            role="progressbar" aria-valuenow="{{ session.completion_percent }}"
-           aria-valuemin="0" aria-valuemax="100"></div>
+           aria-valuemin="0" aria-valuemax="100"
+           aria-label="Learning quality: {{ session.completion_percent }}%"></div>
     </div>
-    <div style="font-size:12px; color:var(--gray-400); margin-bottom:12px;">
+    <div style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
       ⭐ Learning Quality: {{ session.completion_percent }}%
       · ⏱ {{ session.actual_minutes }} min logged
     </div>
