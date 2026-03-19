@@ -31,24 +31,24 @@ class Task(models.Model):
         return self.title
 
     def total_actual_minutes(self):
-        """统计 in_progress + completed 的 session 时长"""
+        """Calculate total session duration excluding cancelled and pending sessions."""
         return self.sessions.exclude(
             status__in=['cancelled', 'pending']
         ).aggregate(total=Sum('actual_minutes'))['total'] or 0
 
     def progress_percent(self):
-        """基于时间的任务进度，最多100%"""
+        """Calculate task progress based on time, capped at 100%."""
         if self.target_minutes == 0:
             return 0
         return min(int(self.total_actual_minutes() / self.target_minutes * 100), 100)
 
     def extra_minutes(self):
-        """超出目标时长，未超出返回0"""
+        """Return extra time beyond target duration, or 0 if not exceeded."""
         extra = self.total_actual_minutes() - self.target_minutes
         return extra if extra > 0 else 0
 
     def average_quality(self):
-        """所有有效 session 的平均学习质量"""
+        """Calculate average completion quality of valid sessions."""
         result = self.sessions.exclude(
             status__in=['cancelled', 'pending']
         ).exclude(
@@ -57,7 +57,7 @@ class Task(models.Model):
         return round(result) if result else 0
 
     def recent_streak(self):
-        """最近7天内连续有 session 的天数，用范围查询避免 MySQL __date 问题"""
+        """Calculate consecutive active days within the last 7 days."""
         now = timezone.now()
         streak = 0
         for i in range(7):
@@ -102,7 +102,7 @@ class Session(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def planned_minutes(self):
-        """计划时长（分钟）"""
+        """Calculate planned duration in minutes."""
         return int((self.planned_end - self.planned_start).total_seconds() / 60)
 
     def __str__(self):
