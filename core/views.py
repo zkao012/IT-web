@@ -1,21 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.utils import timezone
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db import IntegrityError
-from django.db import models
 from django.db.models import Sum
 import json
 
 from .models import Session, Task, Category
 from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
-
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.admin.views.decorators import staff_member_required
 
 # ========== Auth Views ==========
 
@@ -61,54 +58,32 @@ def register_view(request):
 
         if not email or not username or not password1 or not password2:
             error = 'Please fill in all fields.'
-        elif password1 != password2:
-            error = 'Passwords do not match.'
         else:
-            from django.core.validators import validate_email as _validate_email
-            from django.core.exceptions import ValidationError as _ValidationError
             try:
-                _validate_email(email)
-            except _ValidationError:
+                validate_email(email)
+            except ValidationError:
                 error = 'Please enter a valid email address.'
-            if error is None and User.objects.filter(email=email).exists():
-                error = 'Email already registered.'
-            if error is None:
-                try:
-                    user = User.objects.create_user(username=username, email=email, password=password1)
-                    from django.contrib.auth import login as auth_login
-                    auth_login(request, user)
-                    return redirect('dashboard')
-                except IntegrityError:
-                    error = 'Username already exists.'
+
+        if error is None and password1 != password2:
+            error = 'Passwords do not match.'
+
+        if error is None and User.objects.filter(username=username).exists():
+            error = 'Username already exists.'
+
+        if error is None and User.objects.filter(email=email).exists():
+            error = 'Email already exists.'
+
+        if error is None:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1
+            )
+            from django.contrib.auth import login as auth_login
+            auth_login(request, user)
+            return redirect('dashboard')
 
     return render(request, 'auth/register.html', {'error': error})
-
-
-# ========== Admin Dashboard ==========
-
-@staff_member_required(login_url='login')
-def admin_dashboard(request):
-    today = timezone.now()
-    today_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-    return render(request, 'auth/admin_dashboard.html', {
-        'total_users': User.objects.count(),
-        'total_tasks': Task.objects.count(),
-        'active_tasks': Task.objects.filter(is_active=True).count(),
-        'completed_tasks': Task.objects.filter(is_active=False).count(),
-        'total_sessions': Session.objects.count(),
-        'completed_sessions': Session.objects.filter(status='completed').count(),
-        'pending_sessions': Session.objects.filter(status='pending').count(),
-        'in_progress_sessions': Session.objects.filter(status='in_progress').count(),
-        'cancelled_sessions': Session.objects.filter(status='cancelled').count(),
-        'tasks_today': Task.objects.filter(created_at__gte=today_start, created_at__lte=today_end).count(),
-        'sessions_today': Session.objects.filter(created_at__gte=today_start, created_at__lte=today_end).count(),
-        'active_users': User.objects.filter(last_login__gte=today_start, last_login__lte=today_end).count(),
-        'recent_users': User.objects.order_by('-date_joined')[:5],
-        'recent_sessions': Session.objects.select_related('user', 'task').order_by('-created_at')[:5],
-    })
-
 
 # ========== Admin Views ===========
 
@@ -479,7 +454,6 @@ def progress_list(request):
         'done': done,
     })
 
-
 # ========== Task Views ==========
 
 @login_required
@@ -492,9 +466,47 @@ def task_list(request):
     page = request.GET.get('page', 1)
     in_progress_page = paginator.get_page(page)
 
+    now = timezone.now()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    streak = 0
+    for i in range(30):
+        day_start = today_start - timezone.timedelta(days=i)
+        day_end = today_end - timezone.timedelta(days=i)
+        has_session = Session.objects.filter(
+            user=request.user,
+            planned_start__gte=day_start,
+            planned_start__lte=day_end,
+        ).exclude(status__in=['cancelled', 'pending']).exists()
+        if has_session:
+            streak += 1
+        else:
+            break
+
+    week_start = today_start - timezone.timedelta(days=today_start.weekday())
+    week_minutes = Session.objects.filter(
+        user=request.user,
+        planned_start__gte=week_start,
+        planned_start__lte=today_end,
+    ).exclude(status__in=['cancelled', 'pending']).aggregate(
+        total=Sum('actual_minutes')
+    )['total'] or 0
+
+    today_minutes = Session.objects.filter(
+        user=request.user,
+        planned_start__gte=today_start,
+        planned_start__lte=today_end,
+    ).exclude(status__in=['cancelled', 'pending']).aggregate(
+        total=Sum('actual_minutes')
+    )['total'] or 0
+
     return render(request, 'sessions/task_list.html', {
         'in_progress': in_progress_page,
         'completed': completed,
+        'streak': streak,
+        'week_minutes': week_minutes,
+        'today_minutes': today_minutes,
     })
 
 
@@ -514,20 +526,6 @@ def task_create(request):
 
 
 @login_required
-def task_edit(request, pk):
-    task = get_object_or_404(Task, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = TaskForm(request.POST, instance=task)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Task updated successfully!')
-            return redirect('task_list')
-    else:
-        form = TaskForm(instance=task)
-    return render(request, 'sessions/task_form.html', {'form': form, 'editing': True, 'task': task})
-
-
-@login_required
 def task_delete(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
     task.sessions.all().delete()
@@ -544,36 +542,18 @@ def session_list(request):
     status_filter = request.GET.get('status', '')
     now = timezone.now()
 
-    # Auto-update pending sessions to in_progress if start time has passed
     Session.objects.filter(
         user=request.user,
         status='pending',
         planned_start__lte=now
     ).update(status='in_progress')
 
-    from django.db.models import Case, When, IntegerField
     sessions = Session.objects.filter(user=request.user)
     if status_filter:
         sessions = sessions.filter(status=status_filter)
 
-    # Order: in_progress first, then pending, then completed/cancelled, newest first
-    sessions = sessions.annotate(
-        status_order=Case(
-            When(status='in_progress', then=0),
-            When(status='pending', then=1),
-            When(status='completed', then=2),
-            When(status='cancelled', then=3),
-            default=4,
-            output_field=IntegerField(),
-        )
-    ).order_by('status_order', '-planned_start')
-
-    paginator = Paginator(sessions, 10)
-    page = request.GET.get('page', 1)
-    sessions_page = paginator.get_page(page)
-
     return render(request, 'sessions/session_list.html', {
-        'sessions': sessions_page,
+        'sessions': sessions,
         'status_filter': status_filter,
     })
 
@@ -609,10 +589,12 @@ def session_book(request):
 @login_required
 def session_detail(request, pk):
     session = get_object_or_404(Session, pk=pk, user=request.user)
+
     now = timezone.now()
     if session.status == 'pending' and session.planned_start <= now:
         session.status = 'in_progress'
         session.save()
+
     progress_form = ProgressUpdateForm(instance=session)
     return render(request, 'sessions/session_detail.html', {
         'session': session,
@@ -627,8 +609,9 @@ def session_update_progress(request, pk):
 
     if session.status == 'cancelled':
         return JsonResponse({'error': 'Cannot update a cancelled session.'}, status=400)
+
     if session.status == 'pending':
-        return JsonResponse({'error': 'This session has not started yet.'}, status=400)
+        return JsonResponse({'error': 'This session has not started yet. Adjust the time if you want to log progress early.'}, status=400)
 
     try:
         data = json.loads(request.body)
@@ -638,20 +621,26 @@ def session_update_progress(request, pk):
         mark_complete = data.get('mark_complete', False)
 
         if actual_minutes == 0:
-            return JsonResponse({'error': 'Please enter actual time spent before saving.'}, status=400)
+            return JsonResponse({'error': 'Please enter actual time spent before saving progress.'}, status=400)
         if actual_minutes < 0:
-            return JsonResponse({'error': 'Time cannot be negative.'}, status=400)
+            return JsonResponse({'error': 'actual_minutes cannot be negative.'}, status=400)
 
         max_minutes = session.planned_minutes() * 3
         if actual_minutes > max_minutes:
-            return JsonResponse({'error': f'Time too high. Max allowed: {max_minutes} min.'}, status=400)
+            return JsonResponse({'error': f'Time seems too high. Max allowed: {max_minutes} min (3x planned).'}, status=400)
+
         if not (0 <= completion_percent <= 100):
-            return JsonResponse({'error': 'Quality must be between 0 and 100.'}, status=400)
+            return JsonResponse({'error': 'completion_percent must be between 0 and 100.'}, status=400)
 
         session.actual_minutes = actual_minutes
         session.completion_percent = completion_percent
         session.notes = notes
-        session.status = 'completed' if mark_complete else 'in_progress'
+
+        if mark_complete:
+            session.status = 'completed'
+        else:
+            session.status = 'in_progress'
+
         session.save()
 
         return JsonResponse({
@@ -670,12 +659,14 @@ def session_update_progress(request, pk):
 @require_POST
 def session_cancel(request, pk):
     session = get_object_or_404(Session, pk=pk, user=request.user)
+
     if session.status in ['completed', 'cancelled']:
         messages.error(request, 'This session cannot be cancelled.')
     else:
         session.status = 'cancelled'
         session.save()
         messages.success(request, 'Session cancelled.')
+
     return redirect('session_list')
 
 
@@ -725,15 +716,12 @@ def session_reschedule(request, pk):
 
         session.planned_start = new_start
         session.planned_end = new_end
-        # Save time changes first (bug fix: was missing this save)
-        session.save()
 
-        # Then update status if needed
         now = timezone.now()
         if session.status == 'pending' and new_start <= now:
             session.status = 'in_progress'
-            session.save(update_fields=['status'])
 
+        session.save()
         return JsonResponse({'success': True})
 
     except Exception as e:
