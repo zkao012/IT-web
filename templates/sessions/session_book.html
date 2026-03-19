@@ -10,7 +10,7 @@
     {% csrf_token %}
 
     <div style="margin-bottom:18px;">
-      <label class="form-label">Select Task</label>
+      <label class="form-label" for="id_task">Select Task</label>
       {{ form.task }}
       {% if form.task.errors %}
         <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.task.errors }}</div>
@@ -19,14 +19,14 @@
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
       <div>
-        <label class="form-label">Start Time</label>
+        <label class="form-label" for="id_planned_start">Start Time</label>
         {{ form.planned_start }}
         {% if form.planned_start.errors %}
           <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.planned_start.errors }}</div>
         {% endif %}
       </div>
       <div>
-        <label class="form-label">End Time</label>
+        <label class="form-label" for="id_planned_end">End Time</label>
         {{ form.planned_end }}
         {% if form.planned_end.errors %}
           <div style="color:#EF4444; font-size:12px; margin-top:4px;">{{ form.planned_end.errors }}</div>
@@ -35,7 +35,7 @@
     </div>
 
     <div style="margin-bottom:24px;">
-      <label class="form-label">Notes (optional)</label>
+      <label class="form-label" for="id_notes">Notes (optional)</label>
       {{ form.notes }}
     </div>
 
