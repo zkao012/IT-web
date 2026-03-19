@@ -64,14 +64,22 @@ def register_view(request):
         elif password1 != password2:
             error = 'Passwords do not match.'
         else:
+            from django.core.validators import validate_email as _validate_email
+            from django.core.exceptions import ValidationError as _ValidationError
             try:
-                user = User.objects.create_user(username=username, email=email, password=password1)
-                # Auto-login after registration
-                from django.contrib.auth import login as auth_login
-                auth_login(request, user)
-                return redirect('dashboard')
-            except IntegrityError:
-                error = 'Username already exists.'
+                _validate_email(email)
+            except _ValidationError:
+                error = 'Please enter a valid email address.'
+            if error is None and User.objects.filter(email=email).exists():
+                error = 'Email already registered.'
+            if error is None:
+                try:
+                    user = User.objects.create_user(username=username, email=email, password=password1)
+                    from django.contrib.auth import login as auth_login
+                    auth_login(request, user)
+                    return redirect('dashboard')
+                except IntegrityError:
+                    error = 'Username already exists.'
 
     return render(request, 'auth/register.html', {'error': error})
 

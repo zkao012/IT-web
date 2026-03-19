@@ -5,7 +5,7 @@
 {% block content %}
 <div style="max-width:600px;">
 
-  <!-- Session Info -->
+  <!-- 基本信息 -->
   <div class="trackit-card mb-4" style="padding:24px;">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <div>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <!-- Pending: session has not started yet -->
+  <!-- pending：还没开始 -->
   {% if session.status == 'pending' %}
   <div class="trackit-card" style="padding:28px; text-align:center;">
     <div style="font-size:40px; margin-bottom:16px;">⏳</div>
@@ -37,7 +37,7 @@
     </button>
   </div>
 
-  <!-- Adjust time panel -->
+  <!-- 调整时间面板 -->
   <div id="edit-time-panel" class="trackit-card mt-3" style="padding:28px; display:none;">
     <h5 style="font-size:15px; font-weight:700; margin-bottom:20px;">🕐 Adjust Session Time</h5>
     <div id="edit-time-feedback" style="display:none; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px; font-weight:500;"></div>
@@ -56,13 +56,13 @@
     </button>
   </div>
 
-  <!-- Cancelled -->
+  <!-- cancelled -->
   {% elif session.status == 'cancelled' %}
   <div style="background:var(--gray-100); padding:20px; border-radius:var(--radius); color:var(--gray-400); text-align:center;">
     This session has been cancelled.
   </div>
 
-  <!-- In Progress or Completed -->
+  <!-- in_progress / completed -->
   {% else %}
   <div class="trackit-card" style="padding:28px;">
     <h5 style="font-size:16px; font-weight:700; margin-bottom:22px; color:var(--gray-800);">
@@ -71,14 +71,14 @@
 
     <div id="progress-feedback" style="display:none; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:14px; font-weight:500;"></div>
 
-    <!-- Actual time spent -->
+    <!-- 实际时长 -->
     <div style="margin-bottom:20px;">
       <label class="form-label">Actual Time Spent (minutes)</label>
       <input type="number" id="actual_minutes" class="form-control"
              value="{{ session.actual_minutes }}" min="0">
     </div>
 
-    <!-- Learning quality slider -->
+    <!-- 学习质量 -->
     <div style="margin-bottom:20px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <div>
@@ -96,14 +96,14 @@
       </div>
     </div>
 
-    <!-- Session notes -->
+    <!-- 备注 -->
     <div style="margin-bottom:24px;">
       <label class="form-label">Notes</label>
       <textarea id="session_notes" class="form-control" rows="3"
                 placeholder="What did you learn or accomplish?">{{ session.notes }}</textarea>
     </div>
 
-    <!-- Save and Complete buttons -->
+    <!-- 两个按钮 -->
     <div style="display:flex; gap:10px;">
       <button id="save_progress" class="btn-gray" style="flex:1; justify-content:center; padding:12px;">
         <i class="fas fa-save"></i> Save Progress
@@ -125,7 +125,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ===== Learning quality slider =====
+  // ===== 学习质量滑块 =====
   const slider = document.getElementById('completion_percent');
   const display = document.getElementById('percent_display');
 
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ===== Shared save function =====
+  // ===== 通用保存函数 =====
   function saveProgress(markComplete) {
     const payload = {
       actual_minutes: parseInt(document.getElementById('actual_minutes').value) || 0,
@@ -170,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
         fb.style.color = '#065F46';
         fb.textContent = markComplete ? '✅ Session completed!' : '✅ Progress saved!';
         saveBtn.innerHTML = '✅ Saved';
-        // Redirect to session list after short delay
         setTimeout(() => {
           window.location.href = "{% url 'session_list' %}";
         }, 800);
@@ -199,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (saveBtn) saveBtn.addEventListener('click', () => saveProgress(false));
   if (completeBtn) completeBtn.addEventListener('click', () => saveProgress(true));
 
-  // ===== Reschedule session time =====
+  // ===== 调整时间保存 =====
   const saveTimeBtn = document.getElementById('save_time');
 
   if (saveTimeBtn) {
