@@ -13,6 +13,8 @@ from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 
 # ========== Auth Views ==========
 
