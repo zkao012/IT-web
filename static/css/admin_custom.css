@@ -4,14 +4,14 @@ body, * {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-/* 品牌区深橙色（Jazzmin accent-orange 略浅） */
+/* Brand area orange accent */
 body .main-header .brand-link,
 body .main-sidebar .brand-link {
   background-color: #E55A1F;
   font-weight: 800;
 }
 
-/* 卡片圆角 */
+/* Card border radius */
 body .card {
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
@@ -21,7 +21,7 @@ body .card-header {
   border-radius: 14px 14px 0 0;
 }
 
-/* 表格表头橙色 */
+/* Table header orange */
 #result_list thead th {
   background-color: #FFF4EF;
   color: #FF6B2C;
@@ -36,7 +36,7 @@ body .card-header {
   background-color: #FFF4EF;
 }
 
-/* 输入框圆角 */
+/* Input border radius */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -48,7 +48,7 @@ textarea,
   font-size: 14px;
 }
 
-/* 消息提示 */
+/* Alert messages */
 .messagelist .success {
   background: #ECFDF5;
   color: #065F46;
