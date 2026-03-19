@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.utils import timezone
@@ -13,8 +15,6 @@ from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 
 # ========== Auth Views ==========
 
