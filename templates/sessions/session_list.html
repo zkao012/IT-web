@@ -1,19 +1,82 @@
 {% extends 'base.html' %}
-{% block title %}Sessions — TrackIt{% endblock %}
-{% block page_title %}My Sessions{% endblock %}
+{% block title %}Sessions — TrackIt<!-- Pagination -->
+{% if sessions.has_other_pages %}
+<div class="pagination-wrap" role="navigation" aria-label="Pagination">
+  {% if sessions.has_previous %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.previous_page_number }}"
+       class="page-btn" aria-label="Previous page">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+  {% endif %}
+
+  {% for num in sessions.paginator.page_range %}
+    {% if sessions.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+    {% elif num > sessions.number|add:'-3' and num < sessions.number|add:'3' %}
+      <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ num }}"
+         class="page-btn">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if sessions.has_next %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.next_page_number }}"
+       class="page-btn" aria-label="Next page">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+{% block page_title %}My Sessions<!-- Pagination -->
+{% if sessions.has_other_pages %}
+<div class="pagination-wrap" role="navigation" aria-label="Pagination">
+  {% if sessions.has_previous %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.previous_page_number }}"
+       class="page-btn" aria-label="Previous page">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+  {% endif %}
+
+  {% for num in sessions.paginator.page_range %}
+    {% if sessions.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+    {% elif num > sessions.number|add:'-3' and num < sessions.number|add:'3' %}
+      <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ num }}"
+         class="page-btn">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if sessions.has_next %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.next_page_number }}"
+       class="page-btn" aria-label="Next page">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
 
 {% block content %}
 
-<!-- 筛选标签 -->
+<!-- Filter tabs -->
 <div class="filter-tabs">
   <a href="{% url 'session_list' %}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
-  <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">⏳ Pending</a>
   <a href="?status=in_progress" class="filter-tab {% if status_filter == 'in_progress' %}active{% endif %}">🔵 In Progress</a>
+  <a href="?status=pending" class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">⏳ Pending</a>
   <a href="?status=completed" class="filter-tab {% if status_filter == 'completed' %}active{% endif %}">✅ Completed</a>
   <a href="?status=cancelled" class="filter-tab {% if status_filter == 'cancelled' %}active{% endif %}">⬜ Cancelled</a>
 </div>
 
-<!-- Session 列表 -->
 {% for session in sessions %}
 <div class="trackit-card mb-3" style="display:flex; flex-direction:row;">
   <div class="card-accent
@@ -22,13 +85,15 @@
     {% elif session.status == 'cancelled' %}accent-secondary
     {% else %}accent-warning{% endif %}">
   </div>
-  <div style="padding: 20px 24px; flex:1;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+  <div style="padding:18px 22px; flex:1;">
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
       <div>
-        <h5 style="font-size:16px; font-weight:700; margin-bottom:4px;">{{ session.task.title }}</h5>
+        <h5 style="font-size:15px; font-weight:700; margin-bottom:4px; color:var(--gray-800);">{{ session.task.title }}</h5>
         <div style="font-size:13px; color:var(--gray-400);">
           <i class="fas fa-clock" style="margin-right:4px;"></i>
           {{ session.planned_start|date:"M d, Y · H:i" }} → {{ session.planned_end|date:"H:i" }}
+          <span style="margin-left:6px;">· {{ session.planned_minutes }} min planned</span>
         </div>
       </div>
       <span class="status-badge status-{{ session.status }}">
@@ -36,19 +101,24 @@
       </span>
     </div>
 
-    <!-- 时间进度 -->
-    <div class="progress-track">
-      <div class="progress-fill" style="width:{{ session.completion_percent }}%"></div>
+    <!-- Progress bar -->
+    <div style="height:6px; background:var(--gray-100); border-radius:999px; overflow:hidden; margin-bottom:6px;">
+      <div style="height:100%; width:{{ session.completion_percent }}%; background:var(--orange); border-radius:999px;"
+           role="progressbar" aria-valuenow="{{ session.completion_percent }}"
+           aria-valuemin="0" aria-valuemax="100"></div>
     </div>
-    <div style="font-size:12px; color:var(--gray-400); margin-bottom:4px;">
-      ⭐ Learning Quality: {{ session.completion_percent }}% · ⏱ {{ session.actual_minutes }} min logged
+    <div style="font-size:12px; color:var(--gray-400); margin-bottom:12px;">
+      ⭐ Learning Quality: {{ session.completion_percent }}%
+      · ⏱ {{ session.actual_minutes }} min logged
     </div>
 
-    <!-- 操作按钮 -->
-    <div style="display:flex; gap:8px; margin-top:12px;">
+    <!-- Actions -->
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      {% if session.status != 'cancelled' %}
       <a href="{% url 'session_detail' session.pk %}" class="btn-outline-primary-custom">
         <i class="fas fa-edit"></i> Update Progress
       </a>
+      {% endif %}
       {% if session.status != 'cancelled' and session.status != 'completed' %}
       <form method="post" action="{% url 'session_cancel' session.pk %}"
             onsubmit="return confirm('Cancel this session?')" style="display:inline;">
@@ -68,15 +138,49 @@
       </form>
       {% endif %}
     </div>
+
   </div>
 </div>
 
 {% empty %}
-<div class="empty-state">
-  <i class="fas fa-calendar-plus"></i>
-  <p>No sessions yet. Book your first one!</p>
+<div class="task-empty">
+  <div class="task-empty-icon">📆</div>
+  <p style="font-weight:700; color:#374151; margin-bottom:4px;">No sessions yet</p>
+  <p style="font-size:13px; color:var(--gray-400); margin-bottom:16px;">Book your first session to start tracking</p>
   <a href="{% url 'session_book' %}" class="btn-orange">+ Book a Session</a>
 </div>
 {% endfor %}
+
+<!-- Pagination -->
+{% if sessions.has_other_pages %}
+<div class="pagination-wrap" role="navigation" aria-label="Pagination">
+  {% if sessions.has_previous %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.previous_page_number }}"
+       class="page-btn" aria-label="Previous page">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+  {% endif %}
+
+  {% for num in sessions.paginator.page_range %}
+    {% if sessions.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+    {% elif num > sessions.number|add:'-3' and num < sessions.number|add:'3' %}
+      <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ num }}"
+         class="page-btn">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if sessions.has_next %}
+    <a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}page={{ sessions.next_page_number }}"
+       class="page-btn" aria-label="Next page">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  {% else %}
+    <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+  {% endif %}
+</div>
+{% endif %}
 
 {% endblock %}

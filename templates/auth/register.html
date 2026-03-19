@@ -50,8 +50,7 @@
       <div class="mb-3">
         <label class="form-label" for="email">Email</label>
         <input class="form-control" id="email" name="email" type="email"
-               placeholder="you@example.com" autocomplete="email" 
-               aria-required="true" required>
+               placeholder="you@example.com" autocomplete="email" aria-required="true">
       </div>
 
       <div class="mb-3">
@@ -92,32 +91,18 @@
       const p2 = document.getElementById("password2").value.trim();
       const err = document.getElementById("clientError");
 
-      err.style.display = "none";
-      err.textContent = "";
-
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
       if (!email || !username || !p1 || !p2) {
         e.preventDefault();
         err.style.display = "block";
         err.textContent = "All fields are required.";
         return;
       }
-
-      if (!emailPattern.test(email)) {
-        e.preventDefault();
-        err.style.display = "block";
-        err.textContent = "Please enter a valid email address.";
-        return;
-      }
-
       if (p1 !== p2) {
         e.preventDefault();
         err.style.display = "block";
         err.textContent = "Passwords do not match.";
-        return;
       }
-  });
-</script>
+    });
+  </script>
 </body>
 </html>
