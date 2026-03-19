@@ -1,4 +1,4 @@
-/* ===== CSS 变量 ===== */
+/* ===== CSS Variables ===== */
 :root {
   --orange: #FF6B2C;
   --orange-light: #FF8C5A;
@@ -12,13 +12,12 @@
   --gray-600: #4B5563;
   --gray-800: #1F2937;
   --global-nav-height: 58px;
-  --sidebar-width: 220px;
   --radius: 14px;
   --shadow: 0 2px 16px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
 }
 
-/* ===== 全局重置 ===== */
+/* ===== Global Reset ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -28,7 +27,7 @@ body {
   min-height: 100vh;
 }
 
-/* ===== 跳转到主内容（无障碍） ===== */
+/* ===== Skip to main content (accessibility) ===== */
 .skip-link {
   position: absolute;
   top: -100%;
@@ -43,7 +42,7 @@ body {
 }
 .skip-link:focus { top: 16px; }
 
-/* ===== 全站顶部导航 ===== */
+/* ===== Global top navigation ===== */
 .global-nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -166,95 +165,24 @@ body {
   color: var(--orange);
 }
 
-/* ===== 页面整体布局 ===== */
+/* ===== Page layout ===== */
 .page-wrapper {
   display: flex;
   margin-top: var(--global-nav-height);
   min-height: calc(100vh - var(--global-nav-height));
+  background: var(--gray-50);
 }
 
-/* ===== 侧边栏 ===== */
-.sidebar {
-  width: var(--sidebar-width);
-  background: var(--white);
-  border-right: 1px solid var(--gray-200);
-  position: fixed;
-  top: var(--global-nav-height);
-  left: 0;
-  height: calc(100vh - var(--global-nav-height));
-  overflow-y: auto;
-  padding: 20px 12px;
-  z-index: 100;
-}
-
-.sidebar-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--gray-400);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0 10px;
-  margin-bottom: 8px;
-}
-
-.sidebar-divider {
-  height: 1px;
-  background: var(--gray-100);
-  margin: 16px 0;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 4px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 9px;
-  color: var(--gray-600);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 13px;
-  transition: all 0.15s ease;
-}
-
-.nav-item:hover {
-  background: var(--orange-pale);
-  color: var(--orange);
-}
-
-.nav-item.active {
-  background: var(--orange-pale);
-  color: var(--orange);
-  font-weight: 700;
-}
-
-.nav-item i { width: 16px; text-align: center; font-size: 14px; }
-
-.sidebar-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--gray-400);
-}
-
-/* ===== 主内容包装 ===== */
+/* ===== Main content wrapper ===== */
 .main-wrapper {
-  margin-left: var(--sidebar-width);
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - var(--global-nav-height));
+  width: 100%;
+  margin-left: 60px;
 }
 
-/* ===== 顶部栏 ===== */
+/* ===== Top bar ===== */
 .topbar {
   display: flex;
   align-items: center;
@@ -282,7 +210,7 @@ body {
   font-size: 16px;
 }
 
-/* ===== 橙色主按钮 ===== */
+/* ===== Primary orange button ===== */
 .btn-orange {
   background: var(--orange);
   color: white;
@@ -307,13 +235,14 @@ body {
   box-shadow: 0 4px 14px rgba(255,107,44,0.35);
 }
 
-/* ===== 内容区域 ===== */
+/* ===== Content area ===== */
 .content-area {
   padding: 24px 28px;
   flex: 1;
+  background: var(--gray-50);
 }
 
-/* ===== 消息提示 ===== */
+/* ===== Alert messages ===== */
 .alert-banner {
   margin: 12px 28px 0;
   padding: 11px 18px;
@@ -327,7 +256,7 @@ body {
 .alert-success { background: #ECFDF5; color: #065F46; }
 .alert-error, .alert-danger { background: #FEF2F2; color: #991B1B; }
 
-/* ===== 卡片 ===== */
+/* ===== Cards ===== */
 .trackit-card {
   background: var(--white);
   border-radius: var(--radius);
@@ -337,7 +266,7 @@ body {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.trackit-card:hover {
+.trackit-card.hoverable:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
@@ -348,7 +277,7 @@ body {
 .accent-success { background: #10B981; }
 .accent-secondary { background: var(--gray-300); }
 
-/* ===== 筛选标签 ===== */
+/* ===== Filter tabs ===== */
 .filter-tabs {
   display: flex;
   gap: 8px;
@@ -371,7 +300,7 @@ body {
 .filter-tab:hover { border-color: var(--orange); color: var(--orange); }
 .filter-tab.active { background: var(--orange); border-color: var(--orange); color: white; }
 
-/* ===== 进度条 ===== */
+/* ===== Progress bars ===== */
 .progress-track {
   height: 6px;
   background: var(--gray-100);
@@ -387,7 +316,7 @@ body {
   transition: width 0.4s ease;
 }
 
-/* ===== 状态徽章 ===== */
+/* ===== Status badges ===== */
 .status-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -401,7 +330,7 @@ body {
 .status-completed  { background: #D1FAE5; color: #065F46; }
 .status-cancelled  { background: var(--gray-100); color: var(--gray-400); }
 
-/* ===== 表单卡片 ===== */
+/* ===== Form cards ===== */
 .form-card {
   background: var(--white);
   border-radius: var(--radius);
@@ -440,7 +369,7 @@ body {
 
 .form-range { accent-color: var(--orange); }
 
-/* ===== 轮廓按钮 ===== */
+/* ===== Outline buttons ===== */
 .btn-outline-primary-custom {
   border: 1.5px solid var(--orange);
   color: var(--orange);
@@ -495,7 +424,7 @@ body {
 }
 .btn-gray:hover { background: var(--gray-100); color: var(--gray-800); }
 
-/* ===== 空状态 ===== */
+/* ===== Empty state ===== */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -513,7 +442,8 @@ body {
   margin: 0 auto;
   padding: 40px 28px 32px;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr;
+  text-align: center;
   gap: 40px;
 }
 
@@ -581,23 +511,41 @@ body {
   max-width: 100%;
 }
 
-/* ===== 响应式 ===== */
+/* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .global-links { gap: 2px; }
   .global-link { padding: 7px 10px; font-size: 12px; }
 }
 
 @media (max-width: 768px) {
-  .sidebar { display: none; }
-  .main-wrapper { margin-left: 0; }
+  .icon-sidebar { display: none !important; }
+  .main-wrapper { margin-left: 0 !important; }
   .content-area { padding: 16px; }
   .topbar { padding: 12px 16px; }
   .footer-inner { grid-template-columns: 1fr; gap: 24px; }
   .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
-  .global-links { display: none; }
+  .global-links {
+    display: none;
+    position: absolute;
+    top: var(--global-nav-height);
+    left: 0; right: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    flex-direction: column;
+    padding: 8px 16px 16px;
+    gap: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 199;
+  }
+  .global-links.open { display: flex; }
+  #mobile-menu-btn { display: block !important; }
+  .global-username { display: none; }
+  .icon-sidebar { display: none !important; }
+  .main-wrapper { margin-left: 0 !important; max-width: 100%; }
+  .page-wrapper { padding: 0; }
 }
 
-/* ===== 焦点可见性（无障碍） ===== */
+/* ===== Focus visibility (accessibility) ===== */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -608,52 +556,7 @@ select:focus-visible {
   border-radius: 6px;
 }
 
-/* 侧边栏统计卡片 */
-.sidebar-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #FFF4EF;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin: 8px 12px;
-  font-size: 13px;
-}
-
-.sidebar-stat-number {
-  font-size: 20px;
-  font-weight: 800;
-  color: #FF6B2C;
-  line-height: 1;
-}
-
-.sidebar-stat-label {
-  font-size: 11px;
-  color: #9CA3AF;
-  margin-top: 2px;
-}
-
-/* 侧边栏提示 */
-.sidebar-tip {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 8px 12px;
-  padding: 10px 12px;
-  background: #F9FAFB;
-  border-radius: 8px;
-  font-size: 12px;
-  color: #6B7280;
-  line-height: 1.4;
-}
-
-.sidebar-tip i {
-  color: #F59E0B;
-  margin-top: 1px;
-  flex-shrink: 0;
-}
-
-/* ===== Task 便利贴样式 ===== */
+/* ===== Task sticky note styles ===== */
 
 .task-section-label {
   display: flex;
@@ -676,14 +579,14 @@ select:focus-visible {
   border-radius: 99px;
 }
 
-/* 便利贴网格 */
+/* Sticky note grid */
 .sticky-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
 
-/* 便利贴本体 */
+/* Sticky note base */
 .sticky-note {
   position: relative;
   border-radius: 4px 4px 4px 4px;
@@ -695,24 +598,24 @@ select:focus-visible {
   flex-direction: column;
 }
 
-/* 便利贴颜色 — 4种循环 */
-.sticky-note:nth-child(4n+1) { background: #FFF9C4; }  /* 黄 */
-.sticky-note:nth-child(4n+2) { background: #FFE0CC; }  /* 橙 */
-.sticky-note:nth-child(4n+3) { background: #C8F0E8; }  /* 绿 */
-.sticky-note:nth-child(4n+4) { background: #D4E8FF; }  /* 蓝 */
+/* Sticky note colours — 4 rotating */
+.sticky-note:nth-child(4n+1) { background: #FFF9C4; }  /* yellow */
+.sticky-note:nth-child(4n+2) { background: #FFE0CC; }  /* orange */
+.sticky-note:nth-child(4n+3) { background: #C8F0E8; }  /* green */
+.sticky-note:nth-child(4n+4) { background: #D4E8FF; }  /* blue */
 
 .sticky-note:hover {
   transform: translateY(-4px) rotate(0.5deg);
   box-shadow: 6px 8px 20px rgba(0,0,0,0.15);
 }
 
-/* 已完成便利贴 */
+/* Completed sticky note */
 .sticky-done {
   background: #F3F4F6 !important;
   opacity: 0.75;
 }
 
-/* 便利贴顶部圆钉 */
+/* Sticky note pin */
 .sticky-pin {
   position: absolute;
   top: -8px;
@@ -729,7 +632,7 @@ select:focus-visible {
   background: #10B981;
 }
 
-/* 分类标签 */
+/* Category label */
 .sticky-category {
   font-size: 11px;
   font-weight: 700;
@@ -739,7 +642,7 @@ select:focus-visible {
   margin-bottom: 8px;
 }
 
-/* 任务标题 */
+/* Task title */
 .sticky-title {
   font-size: 15px;
   font-weight: 800;
@@ -749,7 +652,7 @@ select:focus-visible {
   flex: 1;
 }
 
-/* 描述 */
+/* Description */
 .sticky-desc {
   font-size: 12px;
   color: #6B7280;
@@ -757,7 +660,7 @@ select:focus-visible {
   margin-bottom: 10px;
 }
 
-/* 进度条 */
+/* Progress bar */
 .sticky-progress-wrap {
   margin-top: auto;
   margin-bottom: 14px;
@@ -783,7 +686,7 @@ select:focus-visible {
   font-weight: 600;
 }
 
-/* 操作按钮 */
+/* Action buttons */
 .sticky-actions {
   display: flex;
   gap: 8px;
@@ -822,7 +725,7 @@ select:focus-visible {
   color: #EF4444 !important;
 }
 
-/* 空状态 */
+/* Empty state */
 .task-empty {
   text-align: center;
   padding: 60px 0;
@@ -832,4 +735,147 @@ select:focus-visible {
 .task-empty-icon {
   font-size: 48px;
   margin-bottom: 12px;
+}
+
+/* ===== Icon Sidebar ===== */
+.icon-sidebar {
+  width: 60px;
+  background: var(--white);
+  border-right: 1px solid var(--gray-200);
+  position: fixed;
+  top: var(--global-nav-height);
+  left: 0;
+  height: calc(100vh - var(--global-nav-height));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  z-index: 100;
+}
+
+.icon-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.icon-nav-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.icon-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--gray-400);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.icon-nav-item:hover {
+  background: var(--orange-pale);
+  color: var(--orange);
+}
+
+.icon-nav-item.active {
+  background: var(--orange-pale);
+  color: var(--orange);
+}
+
+.icon-nav-logout:hover {
+  background: #FEF2F2;
+  color: #EF4444;
+}
+
+/* Tooltip on hover */
+.icon-nav-item::after {
+  content: attr(title);
+  position: absolute;
+  left: 54px;
+  background: var(--gray-800);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+}
+
+.icon-nav-item:hover::after {
+  opacity: 1;
+}
+
+/* ===== Pagination ===== */
+.pagination-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 28px;
+  padding-bottom: 8px;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  background: var(--white);
+  transition: all 0.15s ease;
+}
+
+.page-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.page-btn.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+}
+
+.page-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===== Motivational banner ===== */
+.motivation-banner {
+  background: linear-gradient(135deg, #FFF4EF 0%, #FFF9F6 100%);
+  border: 1px solid #FFD4BC;
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange-dark);
 }
