@@ -21,7 +21,9 @@ from .forms import SessionBookForm, ProgressUpdateForm, TaskForm
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('task_list')
+        if request.user.is_staff:
+            return redirect('admin_dashboard')
+        return redirect('dashboard')
 
     error = None
     if request.method == 'POST':
@@ -50,7 +52,9 @@ def logout_view(request):
 
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('task_list')
+        if request.user.is_staff:
+            return redirect('admin_dashboard')
+        return redirect('dashboard')
 
     error = None
     if request.method == 'POST':
